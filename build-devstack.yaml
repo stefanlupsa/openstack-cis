@@ -1,0 +1,56 @@
+---
+- hosts: devstack
+  vars_files: 
+    - zuul-params.yaml
+
+  tasks:
+    - name: Include variables from group_vars/devstack-{{ zuul_project | basename }}
+      include_vars: "group_vars/devstack-{{ zuul_project | basename }}"
+      failed_when: False
+      tags: always
+
+    - name: Include variables from group_vars/devstack-{{ zuul_project | basename }}-{{ job_type }}
+      include_vars: "group_vars/devstack-{{ zuul_project | basename }}-{{ job_type }}"
+      when: job_type is defined
+      failed_when: False
+      tags: always
+
+    - name: Include variables from group_vars/devstack-{{ zuul_project | basename }}-{{ network_type }}
+      include_vars: "group_vars/devstack-{{ zuul_project | basename }}-{{ network_type }}"
+      when: network_type is defined and job_type is not defined
+      failed_when: False
+      tags: always
+
+    - name: Include variables from group_vars/devstack-{{ zuul_project | basename }}-{{ job_type }}-{{ network_type }}
+      include_vars: "group_vars/devstack-{{ zuul_project | basename }}-{{ job_type }}-{{ network_type }}"
+      when: job_type is defined and network_type is defined
+      failed_when: False
+      tags: always
+
+    - include: tasks/devstack/run-unstack.yaml
+
+    - include: tasks/devstack/install-apt-packages.yaml
+    - include: tasks/devstack/install-pip.yaml
+    - include: tasks/devstack/configure-pip-index.yaml
+    - include: tasks/devstack/install-python-packages.yaml
+
+    - include: tasks/devstack/find-data-port.yaml
+    - include: tasks/devstack/configure-ovs.yaml
+
+    - include: tasks/devstack/install-zuul.yaml
+    - include: tasks/devstack/prepare-git-repos.yaml
+
+    - name: Applying cherry-picks
+      cb_cherry_pick_devstack:
+        url: "{{ git_server }}/{{ item.project }}"
+        ref: "{{ item.patches }}"
+        path: "{{ item.path }}"
+      with_items: "{{ cherry_picks }}"
+      when: cherry_picks is defined
+      tags: cherry-pick
+
+    - include: tasks/devstack/install-networking-hyperv.yaml
+
+    - include: tasks/devstack/write-configs.yaml
+
+    - include: tasks/devstack/run-stack.yaml

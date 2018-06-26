@@ -1,0 +1,42 @@
+- hosts: 127.0.0.1
+  connection: local
+  vars_files: 
+    - zuul-params.yaml
+
+  tasks:
+    - name: Include variables from job_vars/{{ zuul_project | basename }}
+      include_vars: "job_vars/{{ zuul_project | basename }}"
+      failed_when: False
+      tags: always
+
+    - name: Include variables from job_vars/{{ zuul_project | basename }}-{{ job_type }}
+      include_vars: "job_vars/{{ zuul_project | basename }}-{{ job_type }}"
+      failed_when: False
+      when: job_type is defined
+      tags: always
+
+    - include: tasks/boot-instance.yaml
+      with_items: "{{ vms }}"
+      loop_control:
+        loop_var: vm
+
+    - copy: 
+        content="{{ vm_data | to_nice_yaml }}"
+        dest="{{ work_dir }}/vm-data.yaml"
+
+    - include_vars:
+        file: "{{ work_dir }}/vm-data.yaml"
+        name: vm_data
+
+    - name: Generate inventory file
+      blockinfile:
+        path: "{{ inv_file }}"
+        create: yes
+        block: |
+          [{{ item.inventory_group }}]
+          {{ vm_data[item.name].ports.management.port.fixed_ips[0].ip_address }} hostname={{ item.name }} {{ item.additional_params }} compute_host={{ vm_data[item.name].server['OS-EXT-SRV-ATTR:host'] }} compute_instance_name={{ vm_data[item.name].server['OS-EXT-SRV-ATTR:instance_name'] }}
+        marker: "# {mark} {{ item.name }}"
+      with_items: "{{ vms }}"
+      
+    - file: state=absent path="{{ log_path }}"
+    - file: state=directory path="{{ log_path }}"

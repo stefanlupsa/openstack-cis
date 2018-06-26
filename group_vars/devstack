@@ -1,0 +1,57 @@
+########################################################################################################################################
+# devstack specific vars
+########################################################################################################################################
+ansible_ssh_user: ubuntu
+ansible_become_pass: "{{ ansible_ssh_pass }}"
+ansible_python_interpreter: /usr/bin/python3
+
+# used for checking if services are up (tasks/devstack/check-devstack-nova-services.yaml)
+service_check_retries: 12
+service_check_delay: 10
+
+data_interface: eth1
+
+devstack_dir:
+  home: '/home/ubuntu'
+  devstack: '/home/ubuntu/devstack'
+  stack: '/opt/stack'
+  zuul: '/opt/stack/zuul-venv'
+
+devstack_repo: https://github.com/openstack-dev/devstack.git
+neutron_agent_search_string: "Open vSwitch.*hv.*:-)"
+
+keystonerc: |
+  export OS_PROJECT_DOMAIN_NAME=Default
+  export OS_USER_DOMAIN_NAME=Default
+  export OS_USERNAME=admin
+  export OS_TENANT_NAME=admin
+  export OS_PASSWORD=Passw0rd
+  export OS_AUTH_URL=http://127.0.0.1/identity
+  export OS_IDENTITY_API_VERSION=3
+
+apt_packages:
+  - python2.7
+  - openvswitch-switch
+  - htop
+  - gcc
+  - python2.7-dev
+  - python3-dev
+  - libpcre3-dev
+
+python_packages:
+  - virtualenv
+  - netaddr
+  - netifaces
+
+git_prep_projects:
+  - openstack/keystone
+  - openstack/glance
+  - openstack/cinder  
+  - openstack/requirements
+  - openstack/nova
+  - openstack/neutron
+  - openstack/networking-hyperv
+  - openstack/swift
+  - openstack/tempest
+
+image_urls: http://10.100.0.9/ci/cirros-0.3.3-x86_64.vhdx

@@ -1,0 +1,31 @@
+########################################################################################################################################
+# General variables
+########################################################################################################################################
+ansible_ssh_pass: Passw0rd
+ansible_become_pass: "{{ ansible_ssh_pass }}"
+
+git_server: http://git.openstack.org
+
+get_pip_url: https://bootstrap.pypa.io/get-pip.py
+  
+pip_version: pip==9.0.1
+pip_ini_content: | 
+  [global]
+  index-url = http://10.100.0.9:8080/cloudbase/CI/+simple/
+  trusted-host = 10.100.0.9
+  [install]
+  trusted-host = 10.100.0.9
+
+# we install zuul because we need zuul-cloner for git prep
+zuul_version: zuul==2.5.2
+
+# the inteface in this subnet will be used when creating vmswitches and ovs bridges
+data_network: 192.168.0.0/22
+data_bridge: br-data
+enable_tenant_vlans: true
+enable_tenant_tunnels: false
+q_ml2_tenant_network_type: vlan
+
+
+win2016_compute_nodes: "{{ groups['win2016-compute'] }}"
+devstack_ip: "{{ groups['devstack'][0] }}"
