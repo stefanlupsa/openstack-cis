@@ -52,8 +52,8 @@ tempest_tests:
 
   excluded-tests: |
       tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_rebuild_server
-	  tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_rebuild_server_in_stop_state
-	  tempest.scenario.test_network_v6.TestGettingAddress
+      tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_rebuild_server_in_stop_state
+      tempest.scenario.test_network_v6.TestGettingAddress
 
   isolated-tests: |
       tempest.api.compute.admin.test_servers_negative.ServersAdminNegativeTestJSON.test_resize_server_using_overlimit_ram
