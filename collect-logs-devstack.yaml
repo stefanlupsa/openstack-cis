@@ -26,7 +26,7 @@
       tags: always
 
     - name: Include variables from group_vars/devstack-{{ zuul_project | basename }}-{{ job_type }}-{{ network_type }}
-      include_vars: "group_vars/devstack-{{ zuul_project | basename }}-{{ job_type }}"
+      include_vars: "group_vars/devstack-{{ zuul_project | basename }}-{{ job_type }}-{{ network_type }}"
       failed_when: False
       when: job_type is defined and network_type is defined
       tags: always
@@ -38,13 +38,15 @@
 
     - name: Include variables from job_vars/{{ zuul_project | basename }}-{{ job_type }}
       include_vars: "job_vars/{{ zuul_project | basename }}-{{ job_type }}"
+      when: job_type is defined
       failed_when: False
       tags: always
       
-    - name: Include variables from job_vars/{{ zuul_project | basename }}-{{ job_type }}
+    - name: Include variables from job_vars/{{ zuul_project | basename }}-{{ job_type }}-{{ network_type }}
       include_vars: "job_vars/{{ zuul_project | basename }}-{{ job_type }}-{{ network_type }}"
+      when: network_type is defined and job_type is defined
       failed_when: False
-      when: network_type is defined
+      tags: always
 
     - name: Export logs to {{ devstack_dir.stack }}/logs using journalctl
       shell: |
