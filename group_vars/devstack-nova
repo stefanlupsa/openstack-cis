@@ -6,6 +6,10 @@ cherry_picks:
       - refs/changes/28/384528/10
       - refs/changes/13/433213/3
 
+enable_tenant_vlans: false
+enable_tenant_tunnels: true
+q_ml2_tenant_network_type: vxlan
+
 tempest_tests:
   included-tests: |
       tempest.

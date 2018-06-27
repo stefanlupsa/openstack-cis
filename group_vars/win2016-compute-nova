@@ -41,4 +41,9 @@ vmswitches:
     subnet: "{{ data_network }}"
     management: False
 
+python_packages:
+  - ovs
+
+data_bridge_ovs: br-ethernet
+ovs_msi_url: https://cloudbase.it/downloads/openvswitch-hyperv-2.7.0-certified.msi
 win2016_compute_node_ip: "{{ groups['win2016-compute'][0] }}"
