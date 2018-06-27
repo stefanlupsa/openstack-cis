@@ -4,7 +4,6 @@ git_prep_projects:
   - openstack/requirements
   - openstack/nova
   - openstack/neutron
-  - openstack/compute-hyperv
   - openstack/os-win
   
 services:
@@ -35,7 +34,7 @@ cherry_picks:
     patches:
       - refs/changes/21/567621/6
 
-compute_driver: compute_hyperv.driver.HyperVDriver
+compute_driver: hyperv.driver.HyperVDriver
 
 vmswitches:
   - name: "{{ data_bridge }}"
