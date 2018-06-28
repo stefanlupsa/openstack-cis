@@ -5,6 +5,9 @@
     - group_vars/windows
 
   tasks:
+  - name: Set administrator password to {{ ansible_ssh_pass }}
+    win_shell: "net user administrator {{ ansible_ssh_pass }}"
+
   - name: Configure AD domain {{ ad_domain }}
     win_domain:
       dns_domain_name: "{{ ad_domain }}"
