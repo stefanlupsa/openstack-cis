@@ -59,7 +59,7 @@
       when: debug_job is defined and debug_job and job_type is defined
 
     - name: Set log destination for debug job with job_type and network_type
-      set_fact: log_dst="/srv/logs/debug/{{ zuul_project | basename }}/{{ zuul_change }}/{{ zuul_patchset }}/{{ job_type }}/{{ network_type }}/{{ lookup('pipe', 'date +%Y-%m-%d-%H-%M-%S') }}"
+      set_fact: log_dst="/srv/logs/debug/{{ zuul_project | basename }}/{{ zuul_change }}/{{ zuul_patchset }}/{{ job_type }}/{{ lookup('pipe', 'date +%Y-%m-%d-%H-%M-%S') }}"
       when: debug_job is defined and debug_job and job_type is defined and network_type is defined
 
     - name: Set log destination for normal job
@@ -71,7 +71,7 @@
       when: (debug_job is not defined or not debug_job) and job_type is defined
 
     - name: Set log destination for normal job with job_type and network_type
-      set_fact: log_dst="/srv/logs/{{ zuul_project | basename }}/{{ zuul_change }}/{{ zuul_patchset }}/{{ job_type }}/{{ network_type }}"
+      set_fact: log_dst="/srv/logs/{{ zuul_project | basename }}/{{ zuul_change }}/{{ zuul_patchset }}/{{ job_type }}"
       when: (debug_job is not defined or not debug_job) and job_type is defined and network_type is defined
       
     - name: Make sure log server folder is empty
