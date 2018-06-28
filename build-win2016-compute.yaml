@@ -22,7 +22,7 @@
       when: network_type is defined and job_type is not defined
       failed_when: False
       tags: always
-      
+
     # Run sanity checks as early as possible
     - include: tasks/windows/sanity-checks.yaml
     - name: Install FS-iSCSITarget-Server
