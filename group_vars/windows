@@ -42,6 +42,7 @@ win_vcredist_x86_url: http://10.100.0.9/ci/vcredist_x86.exe
 win_freerdp_archive_url: http://10.100.0.9/ci/FreeRDP_powershell.zip
 
 ad_domain: cbci.local
+ansible_ssh_pass: P@ssw0rd
 # extra DNS servers besides the domain controller
 dns_servers: 
   - 8.8.8.8
