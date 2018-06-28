@@ -1,5 +1,6 @@
 ---
 - hosts: win2016-compute
+  serial: 1
   any_errors_fatal: true
   vars_files: 
     - zuul-params.yaml
