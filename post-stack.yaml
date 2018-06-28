@@ -41,7 +41,7 @@
       include_vars: "group_vars/win2016-cinder-{{ job_type }}-{{ network_type }}"
       when: network_type is defined
       tags: always
-      
+
     - include: tasks/windows/join-ad.yaml
       when: join_ad is defined and join_ad
 
@@ -123,7 +123,7 @@
         service_username: "LocalSystem"
         service_password: ""
       when: join_ad is not defined or not join_ad
- 
+
     - name: Start services
       win_service:
         name: "{{ item.name }}"

@@ -86,7 +86,7 @@
         - /var/log/cloud-init.log
         - /var/log/syslog
         - /var/log/mysql/error.log
-        
+
     - name: Copy conf files
       synchronize:
         mode: pull
