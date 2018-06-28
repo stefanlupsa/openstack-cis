@@ -1,4 +1,4 @@
-join_ad: False
+join_ad: True
 ### MUST ENSURE THAT openstack/requirements PROJECT IS ALWAYS ON THE FIRST POSITION in git_prep_projects VARIABLE
 git_prep_projects:
   - openstack/requirements
