@@ -6,6 +6,8 @@ import os
 import signal
 from optparse import OptionParser, OptionValueError
 import json
+import logging
+import logging.handlers
 
 
 loop_check_delay = 5
@@ -23,6 +25,14 @@ tasks_example = {
 }
 
 
+def roll_log(log_file):
+    if os.path.isfile(log_file):
+        logger = logging.getLogger('Roll-Logger')
+        handler = logging.handlers.RotatingFileHandler(log_file, backupCount=5)
+        logger.addHandler(handler)
+        logger.handlers[0].doRollover()
+
+
 # capture SIGINT (ctrl+c) and SIGTERM and kill everything if necessary
 def sigint(s, f):
     print("Received signal: %s" % s)
@@ -33,6 +43,7 @@ def sigint(s, f):
 
 
 def create_process_element(task_name, task_data, attempt=1):
+    roll_log(task_data["log"])
     log = open(task_data["log"], "w")
     result = {
         "process": create_process(task_data["cmd"], log),
