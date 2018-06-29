@@ -32,6 +32,27 @@
       with_items: "{{ services }}"
       tags: create-services
 
+    - name: Create policy.json
+      win_template:
+        src: "windows/policy.json"
+        dest: "{{ win_dir.etc }}\\policy.json"
+      tags: create-configs
+
+    - name: Add "openstack/networking-hyperv" project to git_prep_projects
+      set_fact:
+        git_prep_projects: "{{ git_prep_projects }} + [ 'openstack/networking-hyperv' ]"
+      when: network_type == "hyperv"
+
+    - include: tasks/windows/install-utils.yaml
+    - include: tasks/windows/install-python.yaml
+    - include: tasks/windows/install-pip.yaml
+    - include: tasks/windows/configure-pip-index.yaml
+    - include: tasks/windows/install-git.yaml
+    - include: tasks/windows/install-vcredist.yaml
+    - include: tasks/windows/install-freerdp.yaml
+    - include: tasks/windows/install-zuul.yaml
+    - include: tasks/windows/prepare-git-repos.yaml
+
     - name: Create vmswitches
       cb_vmswitch:
         name: "{{ item.name }}"
@@ -59,27 +80,6 @@
       failed_when: False
       tags: create-configs
 
-    - name: Create policy.json
-      win_template:
-        src: "windows/policy.json"
-        dest: "{{ win_dir.etc }}\\policy.json"
-      tags: create-configs
-
-    - name: Add "openstack/networking-hyperv" project to git_prep_projects
-      set_fact:
-        git_prep_projects: "{{ git_prep_projects }} + [ 'openstack/networking-hyperv' ]"
-      when: network_type == "hyperv"
-
-    - include: tasks/windows/install-utils.yaml
-    - include: tasks/windows/install-python.yaml
-    - include: tasks/windows/install-pip.yaml
-    - include: tasks/windows/configure-pip-index.yaml
-    - include: tasks/windows/install-git.yaml
-    - include: tasks/windows/install-vcredist.yaml
-    - include: tasks/windows/install-freerdp.yaml
-    - include: tasks/windows/install-zuul.yaml
-    - include: tasks/windows/prepare-git-repos.yaml
-    
     - include: tasks/windows/configure-ovs.yaml
       with_items: "{{ vmswitches }}"
       when: network_type == "ovs"
