@@ -32,6 +32,33 @@
       with_items: "{{ services }}"
       tags: create-services
 
+    - name: Create vmswitches
+      cb_vmswitch:
+        name: "{{ item.name }}"
+        management: "{{ item.management }}"
+        subnet: "{{ item.subnet }}"
+        state: present
+      with_items: "{{ vmswitches }}"
+      when: vmswitches is defined
+      register: op
+      tags: create-vmswitch
+
+    - name: Set compute_local_ip variable
+      set_fact: compute_local_ip={{ op.results[0].interface_details.adapter_ip }}
+      when: op.results[0].interface_details.adapter_ip is defined
+
+    - name: Set compute_dataplane_interface_name variable
+      set_fact: compute_dataplane_interface_name={{ op.results[0].interface_details.adapter_name }}
+      when: op.results[0].interface_details.adapter_name is defined
+
+    - name: Create config files
+      win_template:
+        src: "windows/{{ item.template }}"
+        dest: "{{ item.config}}"
+      with_items: "{{ services }}"
+      failed_when: False
+      tags: create-configs
+
     - name: Create policy.json
       win_template:
         src: "windows/policy.json"
@@ -52,6 +79,25 @@
     - include: tasks/windows/install-freerdp.yaml
     - include: tasks/windows/install-zuul.yaml
     - include: tasks/windows/prepare-git-repos.yaml
+
+    - name: Set neutron hyperv agent service
+      set_fact: services={{ services + neutron_hyperv_agent }}
+      when: network_type == "hyperv"
+
+    - name: Set neutron ovs agent service
+      set_fact: services={{ services + neutron_ovs_agent }}
+      when: network_type == "ovs"
+
+    - name: Create services and/or stop them if they are running
+      win_service:
+        name: "{{ item.name }}"
+        display_name: "{{ item.name }}"
+        description: "{{ item.description}}"
+        state: stopped
+        start_mode: manual
+        path: "{{ win_dir.bin }}\\OpenStackService.exe {{ item.name }} {{ item.binary }} --config-file {{ item.config }}"
+      with_items: "{{ services }}"
+      tags: create-services
 
     - name: Create vmswitches
       cb_vmswitch:
