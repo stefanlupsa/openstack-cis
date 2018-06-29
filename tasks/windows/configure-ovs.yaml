@@ -42,8 +42,8 @@
 
     - name: Set compute_local_ip and compute_dataplane_interface_name variables
       set_fact:
-        compute_local_ip: {{ (dataplane_informations['content'] | b64decode | from_yaml).compute_local_ip }}
-        compute_dataplane_interface_name: {{ (dataplane_informations['content'] | b64decode | from_yaml).compute_dataplane_interface_name }}
+        compute_local_ip={{ (dataplane_informations['content'] | b64decode | from_yaml).compute_local_ip }}
+        compute_dataplane_interface_name={{ (dataplane_informations['content'] | b64decode | from_yaml).compute_dataplane_interface_name }}
 
     - name: Check if {{ data_bridge_ovs }} exists
       win_shell: "ovs-vsctl --db=tcp:127.0.0.1:6640 show | Select-String -Pattern \"{{ data_bridge_ovs }}\""
