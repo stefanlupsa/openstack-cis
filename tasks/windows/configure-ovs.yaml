@@ -37,7 +37,7 @@
 
     - name: Get dataplane_informations.yaml content
       slurp:
-        src: "{{ win_dir.config }}\\dataplane_informations.yaml"
+        src: "{{ win_dir.etc }}\\dataplane_informations.yaml"
       register: dataplane_informations
 
     - name: Set compute_local_ip and compute_dataplane_interface_name variables
