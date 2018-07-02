@@ -27,7 +27,7 @@
         src: "{{ item }}"
         dest: "{{ log_path }}"
       with_fileglob:
-        - "{{ work_dir }}/*.log"
+        - "{{ work_dir }}/*.log*"
       failed_when: False
 
     - name: Copy jenkins console log
