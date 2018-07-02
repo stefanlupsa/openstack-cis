@@ -12,19 +12,14 @@
 
     - name: Include variables from job_vars/{{ zuul_project | basename }}-{{ job_type }}
       include_vars: "job_vars/{{ zuul_project | basename }}-{{ job_type }}"
+      when: job_type is defined
       failed_when: False
       tags: always
 
-    - name: Include variables from group_vars/devstack-{{ zuul_project | basename }}-{{ network_type }}
-      include_vars: "group_vars/devstack-{{ zuul_project | basename }}-{{ network_type }}"
+    - name: Include variables from job_vars/{{ zuul_project | basename }}-{{ network_type }}
+      include_vars: "job_vars/{{ zuul_project | basename }}-{{ network_type }}"
+      when: job_type is not defined and network_type is defined
       failed_when: False
-      when: network_type is defined and job_type is not defined
-      tags: always
-
-    - name: Include variables from job_vars/{{ zuul_project | basename }}-{{ job_type }}-{{ network_type }}
-      include_vars: "job_vars/{{ zuul_project | basename }}-{{ job_type }}-{{ network_type }}"
-      failed_when: False
-      when: network_type is defined
       tags: always
 
     - name: Copy build files to log folder
@@ -32,7 +27,7 @@
         src: "{{ item }}"
         dest: "{{ log_path }}"
       with_fileglob:
-        - "{{ work_dir }}/*.log"
+        - "{{ work_dir }}/*.log*"
       failed_when: False
 
     - name: Copy jenkins console log
@@ -52,14 +47,10 @@
     - name: Set log destination for debug job
       set_fact: log_dst="/srv/logs/debug/{{ zuul_project | basename }}/{{ zuul_change }}/{{ zuul_patchset }}/{{ lookup('pipe', 'date +%Y-%m-%d-%H-%M-%S') }}"
       when: debug_job is defined and debug_job and job_type is not defined
-      
+
     - name: Set log destination for debug job with job_type
       set_fact: log_dst="/srv/logs/debug/{{ zuul_project | basename }}/{{ zuul_change }}/{{ zuul_patchset }}/{{ job_type }}/{{ lookup('pipe', 'date +%Y-%m-%d-%H-%M-%S') }}"
       when: debug_job is defined and debug_job and job_type is defined
-
-    - name: Set log destination for debug job with job_type and network_type
-      set_fact: log_dst="/srv/logs/debug/{{ zuul_project | basename }}/{{ zuul_change }}/{{ zuul_patchset }}/{{ job_type }}/{{ network_type }}/{{ lookup('pipe', 'date +%Y-%m-%d-%H-%M-%S') }}"
-      when: debug_job is defined and debug_job and job_type is defined and network_type is defined
 
     - name: Set log destination for normal job
       set_fact: log_dst="/srv/logs/{{ zuul_project | basename }}/{{ zuul_change }}/{{ zuul_patchset }}"
@@ -69,10 +60,6 @@
       set_fact: log_dst="/srv/logs/{{ zuul_project | basename }}/{{ zuul_change }}/{{ zuul_patchset }}/{{ job_type }}"
       when: (debug_job is not defined or not debug_job) and job_type is defined
 
-    - name: Set log destination for normal job with job_type and network_type
-      set_fact: log_dst="/srv/logs/{{ zuul_project | basename }}/{{ zuul_change }}/{{ zuul_patchset }}/{{ job_type }}/{{ network_type }}"
-      when: (debug_job is not defined or not debug_job) and job_type is defined and network_type is defined
-      
     - name: Make sure log server folder is empty
       shell: |
         ssh cloudbase@cloudbase-ci.com -i "{{ log_key }}" "if [ -d {{ log_dst }} ];then rm -rf {{ log_dst }};fi; mkdir -p {{ log_dst }}"

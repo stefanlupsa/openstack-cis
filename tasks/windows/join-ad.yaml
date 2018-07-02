@@ -16,6 +16,7 @@
       domain_admin_user: "administrator@{{ ad_domain }}"
       domain_admin_password: "{{ ansible_ssh_pass }}"
       state: domain
+      log_path: "{{ win_dir.log }}\\join-ad-result.log"
     register: domain_state
     until: domain_state.rc is not defined or domain_state.rc == 0
     retries: 3

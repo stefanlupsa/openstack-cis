@@ -51,6 +51,26 @@
       set_fact: compute_dataplane_interface_name={{ op.results[0].interface_details.adapter_name }}
       when: op.results[0].interface_details.adapter_name is defined
 
+    - name: Check if dataplane informations variable file exists
+      win_stat:
+        path: "{{ win_dir.etc }}\\dataplane_informations.yaml"
+      register: result
+
+    - name: Create dataplane_informations.yaml file
+      win_file:
+        path: "{{ win_dir.etc }}\\dataplane_informations.yaml"
+        state: touch
+      when: result.stat.exists == False
+
+    - name: Add dataplane interface informations in dataplane_informations.yaml
+      win_lineinfile:
+        path: "{{ win_dir.etc }}\\dataplane_informations.yaml"
+        line: "{{ item }}"
+      with_items:
+        - "compute_local_ip: {{ compute_local_ip }}"
+        - "compute_dataplane_interface_name: \"{{ compute_dataplane_interface_name }}\""
+      when: compute_local_ip is defined and compute_dataplane_interface_name is defined
+
     - name: Create config files
       win_template:
         src: "windows/{{ item.template }}"

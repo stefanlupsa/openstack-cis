@@ -1,14 +1,14 @@
 cherry_picks:
-  - project: openstack-dev/devstack
-    path: "{{ devstack_dir.devstack }}"
+  - project: openstack/tempest
+    path: "{{ devstack_dir.stack }}/tempest"
     patches:
-      - refs/changes/25/473525/3
-#  - project: openstack/tempest
-#    path: "{{ devstack_dir.stack }}/tempest"
-#    patches:
-#      - refs/changes/49/383049/13
-#      - refs/changes/28/384528/10
-#      - refs/changes/13/433213/3
+      - refs/changes/49/383049/13
+      - refs/changes/28/384528/10
+      - refs/changes/13/433213/3
+
+enable_tenant_vlans: false
+enable_tenant_tunnels: true
+q_ml2_tenant_network_type: vxlan
 
 tempest_tests:
   included-tests: |
