@@ -39,7 +39,6 @@ local_conf:
     - cinder
     - c-api
     - c-sch
-    - c-bak
     - s-proxy
     - s-object
     - s-container
@@ -57,6 +56,7 @@ local_conf:
     - tempest
 
   disable_services:
+    - c-bak
     - c-vol
     - n-obj
     - n-novnc
@@ -156,6 +156,8 @@ post_stack_bash: |
     iniset $TEMPEST_CONFIG compute build_timeout 360
     iniset $TEMPEST_CONFIG orchestration build_timeout 360
     iniset $TEMPEST_CONFIG volume build_timeout 360
+    iniset $TEMPEST_CONFIG volume manage_volume_ref "source-name, '//127.0.0.1/smbshare/volume-%s.vhdx'"
+    iniset $TEMPEST_CONFIG volume storage_protocol smbfs
     iniset $TEMPEST_CONFIG boto build_timeout 360
 
     iniset $TEMPEST_CONFIG compute ssh_timeout 360

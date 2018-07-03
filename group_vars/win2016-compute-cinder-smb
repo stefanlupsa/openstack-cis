@@ -16,10 +16,17 @@ services:
     config: "{{ win_dir.etc }}\\nova.conf"
     template: nova.conf
 
-  - cinder:
+  - cinder-volume:
     name: cinder-volume
     description: OpenStack Cinder Volume Service
     binary: "{{ win_dir.python }}\\scripts\\cinder-volume.exe"
+    config: "{{ win_dir.etc }}\\cinder.conf"
+    template: cinder.conf
+
+  - cinder-backup:
+    name: cinder-backup
+    description: OpenStack Cinder Backup Service
+    binary: "{{ win_dir.python }}\\scripts\\cinder-backup.exe"
     config: "{{ win_dir.etc }}\\cinder.conf"
     template: cinder.conf
 
