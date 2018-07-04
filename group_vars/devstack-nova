@@ -3,7 +3,7 @@ cherry_picks:
     path: "{{ devstack_dir.stack }}/tempest"
     patches:
       - refs/changes/49/383049/15
-      - refs/changes/28/384528/10
+      - refs/changes/28/384528/13
       - refs/changes/13/433213/3
 
 enable_tenant_vlans: false
