@@ -41,7 +41,7 @@ win_git_installer_url: http://10.100.0.9/ci/Git-2.13.2-64-bit.exe
 win_vcredist_x86_url: http://10.100.0.9/ci/vcredist_x86.exe
 win_freerdp_archive_url: http://10.100.0.9/ci/FreeRDP_powershell.zip
 
-ad_domain: cbci.local
+ad_domain: "cbci-{{ zuul_change }}-{{ zuul_patchset }}.local"
 # extra DNS servers besides the domain controller
 dns_servers: 
   - 8.8.8.8

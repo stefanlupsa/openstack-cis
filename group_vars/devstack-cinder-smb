@@ -12,6 +12,10 @@ zuul_head_only: True
 #      - refs/changes/41/403641/4
 #      - refs/changes/19/426719/4
 
+enable_tenant_vlans: false
+enable_tenant_tunnels: true
+q_ml2_tenant_network_type: vxlan
+
 local_conf:
   enable_services:
     - rabbit
@@ -35,7 +39,6 @@ local_conf:
     - cinder
     - c-api
     - c-sch
-    - c-bak
     - s-proxy
     - s-object
     - s-container
@@ -53,6 +56,7 @@ local_conf:
     - tempest
 
   disable_services:
+    - c-bak
     - c-vol
     - n-obj
     - n-novnc
@@ -63,10 +67,10 @@ local_conf:
     - horizon
 
   ip_version: 4
-  live_migration: True
+  live_migration: False
   block_migration: True
   tenant_vlan_range: "{{ vlan_range }}"
-  image_urls: "{{ image_urls }}"  
+  image_urls: "{{ image_urls }}"
   append: |
     ATTACH_ENCRYPTED_VOLUME_AVAILABLE=False
     SWIFT_REPLICAS=1
@@ -125,10 +129,10 @@ local_conf:
     [ovs]
     of_interface = ovs-ofctl
 
-localsh_append: |
+#localsh_append: |
     # Workaround for the missing volume type id. TODO: remove this after it's fixed.
     # This is also used for the wrong extra_specs format issue
-    cinder type-create blank
+#    cinder type-create blank
 
 post_stack_bash: |
     source {{ devstack_dir.devstack }}/functions
@@ -138,8 +142,9 @@ post_stack_bash: |
     iniset $TEMPEST_CONFIG compute-feature-enabled rdp_console true
     iniset $TEMPEST_CONFIG compute-feature-enabled block_migrate_cinder_iscsi False
     iniset $TEMPEST_CONFIG compute-feature-enabled block_migration_for_live_migration False
-    iniset $TEMPEST_CONFIG compute-feature-enabled live_migration True
+    iniset $TEMPEST_CONFIG compute-feature-enabled live_migration False
     iniset $TEMPEST_CONFIG compute-feature-enabled interface_attach False
+    iniset $TEMPEST_CONFIG compute-feature-enabled swap_volume False
 
     iniset $TEMPEST_CONFIG scenario img_dir "/home/ubuntu/devstack/files/"
     iniset $TEMPEST_CONFIG scenario img_file "{{ local_conf.image_urls | basename }}"
@@ -151,8 +156,42 @@ post_stack_bash: |
     iniset $TEMPEST_CONFIG compute build_timeout 360
     iniset $TEMPEST_CONFIG orchestration build_timeout 360
     iniset $TEMPEST_CONFIG volume build_timeout 360
+    iniset $TEMPEST_CONFIG volume manage_volume_ref "source-name, //127.0.0.1/smbshare/volume-%s.vhdx"
+    iniset $TEMPEST_CONFIG volume storage_protocol smbfs
     iniset $TEMPEST_CONFIG boto build_timeout 360
 
     iniset $TEMPEST_CONFIG compute ssh_timeout 360
     iniset $TEMPEST_CONFIG compute allow_tenant_isolation True
-    iniset $TEMPEST_CONFIG volume-feature-enabled manage_volume False
+#    iniset $TEMPEST_CONFIG volume-feature-enabled manage_volume False
+
+tempest_tests:
+  included-tests: |
+      tempest.api.volume
+      tempest.api.orchestration.stacks.test_volumes
+      tempest.api.compute.volumes
+      tempest.api.compute.admin.test_live_migration.LiveBlockMigrationTestJSON.test_iscsi_volume
+      tempest.api.compute.admin.test_live_migration.LiveBlockMigrationTestJSON.test_volume_backed_live_migration
+      tempest.api.compute.servers.test_delete_server.DeleteServersTestJSON.test_delete_server_while_in_attached_volume
+      tempest.api.compute.servers.test_server_rescue_negative.ServerRescueNegativeTestJSON.test_rescued_vm_attach_volume
+      tempest.api.compute.servers.test_server_rescue_negative.ServerRescueNegativeTestJSON.test_rescued_vm_detach_volume
+      tempest.scenario.test_encrypted_cinder_volumes
+      tempest.scenario.test_minimum_basic.TestMinimumBasicScenario.test_minimum_basic_scenario
+      tempest.scenario.test_shelve_instance.TestShelveInstance.test_shelve_volume_backed_instance
+      tempest.scenario.test_stamp_pattern.TestStampPattern.test_stamp_pattern
+      tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern.test_create_ebs_image_and_check_boot
+      tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern.test_volume_boot_pattern
+      tempest.scenario.test_volume_boot_pattern.TestVolumeBootPatternV2.test_create_ebs_image_and_check_boot
+      tempest.scenario.test_volume_boot_pattern.TestVolumeBootPatternV2.test_volume_boot_pattern
+      tempest.thirdparty.boto.test_ec2_instance_run.InstanceRunTest.test_compute_with_volumes
+      tempest.thirdparty.boto.test_ec2_volumes
+      tempest.thirdparty.boto.test_ec2_volumes
+
+  excluded-tests: |
+      tempest.api.volume.admin.test_snapshot_manage
+      # volume extend is not supported when having snapshots
+      tempest.api.volume.test_volumes_extend.VolumesExtendTest.test_volume_extend_when_volume_has_snapshot
+      # https://bugs.launchpad.net/tempest/+bug/1691144
+      tempest.api.volume.admin.test_volume_hosts.VolumeHostsAdminTestsJSON.test_show_host
+      # exclude requested by luci, sometimes it fails reading from a diff image while the volume is attached
+      tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern
+      tempest.api.volume.test_volumes_extend.VolumesExtendAttachedTest.test_extend_attached_volume
