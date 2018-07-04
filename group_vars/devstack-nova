@@ -2,7 +2,7 @@ cherry_picks:
   - project: openstack/tempest
     path: "{{ devstack_dir.stack }}/tempest"
     patches:
-      - refs/changes/49/383049/13
+      - refs/changes/49/383049/15
       - refs/changes/28/384528/10
       - refs/changes/13/433213/3
 
@@ -38,6 +38,8 @@ tempest_tests:
       # This functionality is not supported yet
       tempest.api.compute.admin.test_server_diagnostics.ServerDiagnosticsTest
       tempest.api.compute.admin.test_server_diagnostics.ServerDiagnosticsV248Test
+      tempest.api.compute.servers.test_device_tagging.TaggedAttachmentsTest.test_tagged_attachment
+      tempest.api.volume.test_volumes_extend.VolumesExtendAttachedTest.test_extend_attached_volume
 
   isolated-tests: |
       tempest.api.compute.admin.test_servers_negative.ServersAdminNegativeTestJSON.test_resize_server_using_overlimit_ram

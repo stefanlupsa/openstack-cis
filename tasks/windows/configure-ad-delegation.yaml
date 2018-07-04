@@ -1,0 +1,14 @@
+---
+  - name: Configure Trust Delegation
+    win_shell: "Set-ADAccountControl -Identity $(Get-ADComputer -Identity {{ hostvars[compute_node]['hostname'][:15] }}) -TrustedToAuthForDelegation $true"
+    tags: configure-trust-delegation
+
+  - name: Configure Live Migration Delegation Access
+    win_shell: "Set-ADObject -Identity $(Get-ADComputer -Identity {{ hostvars[compute_node]['hostname'][:15] }}) -Add @{'msDS-AllowedToDelegateTo' = ('{0}/{1}' -f 'Microsoft Virtual System Migration Service', '{{ hostvars[item]['hostname'][:15] }}') } "
+    with_items: "{{ win2016_compute_nodes }}"
+    tags: configure-trust-delegation
+
+  - name: Configure SMB Delegation Access
+    win_shell: "Set-ADObject -Identity $(Get-ADComputer -Identity {{ hostvars[compute_node]['hostname'][:15] }}) -Add @{'msDS-AllowedToDelegateTo' = ('{0}/{1}' -f 'cifs', '{{ hostvars[item]['hostname'][:15] }}') } "
+    with_items: "{{ win2016_compute_nodes }}"
+    tags: configure-trust-delegation

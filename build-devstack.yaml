@@ -41,6 +41,7 @@
         path: "{{ item.path }}"
       with_items: "{{ cherry_picks }}"
       when: cherry_picks is defined
+      become: True
       tags: cherry-pick
 
     - include: tasks/devstack/install-networking-hyperv.yaml

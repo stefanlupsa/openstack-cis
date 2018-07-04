@@ -137,6 +137,35 @@
       with_items: "{{ services }}"
       tags: start-services
 
+- hosts: ad
+  vars_files:
+    - zuul-params.yaml
+    - group_vars/windows
+
+  tasks:
+    - name: Include additional variables based on project
+      include_vars: "group_vars/win2016-compute-{{ zuul_project | basename }}"
+      failed_when: False
+      tags: always
+
+    - name: Include additional variables based on project job_type
+      include_vars: "group_vars/win2016-compute-{{ zuul_project | basename }}-{{ job_type }}"
+      when: job_type is defined
+      failed_when: False
+      tags: always
+
+    - name: Include additional variables based on project network_type
+      include_vars: "group_vars/win2016-compute-{{ zuul_project | basename }}-{{ network_type }}"
+      when: job_type is not defined and network_type is defined
+      failed_when: False
+      tags: always
+
+    - include: tasks/windows/configure-ad-delegation.yaml
+      with_items: "{{ win2016_compute_nodes }}"
+      loop_control:
+        loop_var: compute_node
+      when: join_ad is defined and join_ad
+
 - hosts: devstack
   vars_files: 
     - zuul-params.yaml
