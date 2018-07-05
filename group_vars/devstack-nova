@@ -2,13 +2,15 @@ cherry_picks:
   - project: openstack/tempest
     path: "{{ devstack_dir.stack }}/tempest"
     patches:
-      - refs/changes/49/383049/13
-      - refs/changes/28/384528/10
+      - refs/changes/49/383049/15
+      - refs/changes/28/384528/13
       - refs/changes/13/433213/3
 
 enable_tenant_vlans: false
 enable_tenant_tunnels: true
 q_ml2_tenant_network_type: vxlan
+
+neutron_agent_search_string: "Open vSwitch.*n-h.*:-)"
 
 tempest_tests:
   included-tests: |
@@ -38,6 +40,8 @@ tempest_tests:
       # This functionality is not supported yet
       tempest.api.compute.admin.test_server_diagnostics.ServerDiagnosticsTest
       tempest.api.compute.admin.test_server_diagnostics.ServerDiagnosticsV248Test
+      tempest.api.compute.servers.test_device_tagging.TaggedAttachmentsTest.test_tagged_attachment
+      tempest.api.volume.test_volumes_extend.VolumesExtendAttachedTest.test_extend_attached_volume
 
   isolated-tests: |
       tempest.api.compute.admin.test_servers_negative.ServersAdminNegativeTestJSON.test_resize_server_using_overlimit_ram
@@ -136,6 +140,7 @@ local_conf:
   block_migration: True
   tenant_vlan_range: "{{ vlan_range }}"
   image_urls: "{{ image_urls }}"
+
   append: |
     SWIFT_REPLICAS=1
     SWIFT_HASH=66a3d6b56c1f479c8b4e70ab5d2014f6
