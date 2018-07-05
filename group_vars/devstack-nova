@@ -6,10 +6,6 @@ cherry_picks:
       - refs/changes/28/384528/13
       - refs/changes/13/433213/3
 
-enable_tenant_vlans: false
-enable_tenant_tunnels: true
-q_ml2_tenant_network_type: vxlan
-
 neutron_agent_search_string: "Open vSwitch.*n-h.*:-)"
 
 tempest_tests:
@@ -139,6 +135,9 @@ local_conf:
   live_migration: True
   block_migration: True
   tenant_vlan_range: "{{ vlan_range }}"
+  enable_tenant_vlans: false
+  enable_tenant_tunnels: true
+  q_ml2_tenant_network_type: vxlan
   image_urls: "{{ image_urls }}"
 
   append: |

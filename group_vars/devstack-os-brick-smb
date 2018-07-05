@@ -12,10 +12,6 @@ zuul_head_only: True
 #      - refs/changes/41/403641/4
 #      - refs/changes/19/426719/4
 
-enable_tenant_vlans: false
-enable_tenant_tunnels: true
-q_ml2_tenant_network_type: vxlan
-
 local_conf:
   enable_services:
     - rabbit
@@ -70,6 +66,9 @@ local_conf:
   live_migration: False
   block_migration: True
   tenant_vlan_range: "{{ vlan_range }}"
+  enable_tenant_vlans: false
+ enable_tenant_tunnels: true
+ q_ml2_tenant_network_type: vxlan
   image_urls: "{{ image_urls }}"
   append: |
     ATTACH_ENCRYPTED_VOLUME_AVAILABLE=False

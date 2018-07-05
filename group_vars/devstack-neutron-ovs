@@ -10,10 +10,6 @@
 #    patches:
 #      - refs/changes/25/473525/3
 
-enable_tenant_vlans: false
-enable_tenant_tunnels: true
-q_ml2_tenant_network_type: vxlan
-
 tempest_tests:
   included-tests: |
       tempest.api.network
@@ -152,6 +148,9 @@ local_conf:
   block_migration: True
   tenant_vlan_range: "{{ vlan_range }}"
   image_urls: "{{ image_urls }}"
+  enable_tenant_vlans: false
+  enable_tenant_tunnels: true
+  q_ml2_tenant_network_type: vxlan
   append: |
     SWIFT_REPLICAS=1
     SWIFT_HASH=66a3d6b56c1f479c8b4e70ab5d2014f6
