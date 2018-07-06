@@ -209,10 +209,6 @@ local_conf:
     [ovs]
     of_interface = ovs-ofctl
 
-    [[post-config|/$NOVA_CELLS_CONF]]
-    [api_database]
-    connection = mysql+pymysql://root:Passw0rd@127.0.0.1/nova_api?charset=utf8
-
 post_stack_bash: |
     source {{ devstack_dir.devstack }}/functions
     TEMPEST_CONFIG={{ devstack_dir.stack }}/tempest/etc/tempest.conf
@@ -238,3 +234,7 @@ post_stack_bash: |
 
     iniset $TEMPEST_CONFIG compute ssh_timeout 360
     iniset $TEMPEST_CONFIG compute allow_tenant_isolation True
+
+    iniset /etc/nova/nova_cell1.conf api_database connection mysql+pymysql://root:Passw0rd@127.0.0.1/nova_api?charset=utf8
+    sudo systemctl restart devstack@n-cond-cell1
+
