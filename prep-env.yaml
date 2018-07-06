@@ -26,6 +26,11 @@
       loop_control:
         loop_var: vm
 
+    - name: Configure FibreChannel
+      include_tasks: tasks/configure-fibrechannel.yaml
+      with_items: "{{ groups['all'] }}"
+      when: job_type == "fc"
+
     - copy: 
         content="{{ vm_data | to_nice_yaml }}"
         dest="{{ work_dir }}/vm-data.yaml"

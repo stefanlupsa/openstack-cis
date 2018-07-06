@@ -26,11 +26,6 @@
       include_tasks: tasks/configure-compute-trunk.yaml
       with_items: "{{ groups['all'] }}"
 
-    - name: Configure FibreChannel
-      include_tasks: tasks/configure-fibrechannel.yaml
-      with_items: "{{ groups['all'] }}"
-      when: job_type == "fc"
-
 - hosts: win2016-cinder
   vars_files:
     - zuul-params.yaml
