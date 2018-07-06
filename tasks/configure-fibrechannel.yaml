@@ -22,5 +22,5 @@
   - name: Wait for VMs to be reachable
     wait_for_connection:
       delay: 3
-      timeout: 60
+      timeout: 120
       sleep: 15
