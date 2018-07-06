@@ -12,6 +12,10 @@ zuul_head_only: True
 #      - refs/changes/41/403641/4
 #      - refs/changes/19/426719/4
 
+enable_tenant_vlans: false
+enable_tenant_tunnels: true
+q_ml2_tenant_network_type: vxlan
+
 local_conf:
   enable_services:
     - rabbit
@@ -35,6 +39,8 @@ local_conf:
     - cinder
     - c-api
     - c-sch
+    - c-vol
+    - c-bak
     - s-proxy
     - s-object
     - s-container
@@ -52,8 +58,6 @@ local_conf:
     - tempest
 
   disable_services:
-    - c-bak
-    - c-vol
     - n-obj
     - n-novnc
     - n-net
@@ -66,15 +70,16 @@ local_conf:
   live_migration: False
   block_migration: True
   tenant_vlan_range: "{{ vlan_range }}"
-  enable_tenant_vlans: false
-  enable_tenant_tunnels: true
-  q_ml2_tenant_network_type: vxlan
   image_urls: "{{ image_urls }}"
   append: |
     ATTACH_ENCRYPTED_VOLUME_AVAILABLE=False
     SWIFT_REPLICAS=1
     SWIFT_HASH=66a3d6b56c1f479c8b4e70ab5d2014f6
     SWIFT_START_ALL_SERVICES=False
+    TEMPEST_VOLUME_DRIVER="3parFC"
+    TEMPEST_VENDOR_NAME="Hewlett Packard Enterprise"
+    TEMPEST_STORAGE_PROTOCOL=FC
+    CINDER_ENABLED_BACKENDS=3PARFC
 
     [[post-config|$NOVA_CONF]]
     [DEFAULT]
@@ -118,6 +123,19 @@ local_conf:
     [[post-config|$CINDER_CONF]]
     [DEFAULT]
     os_privileged_user_auth_url=http://{{ devstack_ip }}/identity/v2.0
+    [3PARFC]
+    volume_backend_name=3PARFC
+    volume_driver=cinder.volume.drivers.hpe.hpe_3par_fc.HPE3PARFCDriver
+    hp3par_api_url=https://10.105.1.231:8080/api/v1
+    hp3par_username=3paradm
+    hp3par_password=3pardata
+    hp3par_cpg=cpg_cinder
+    hp3par_debug=true
+    san_ip=10.105.1.231
+    san_login=3paradm
+    san_password=3pardata
+    max_over_subscription_ratio=20.0
+    reserved_percentage=15
  
     [[post-config|/$Q_PLUGIN_CONF_FILE]]
     [securitygroup]
@@ -155,8 +173,6 @@ post_stack_bash: |
     iniset $TEMPEST_CONFIG compute build_timeout 360
     iniset $TEMPEST_CONFIG orchestration build_timeout 360
     iniset $TEMPEST_CONFIG volume build_timeout 360
-    iniset $TEMPEST_CONFIG volume manage_volume_ref "source-name, //127.0.0.1/smbshare/volume-%s.vhdx"
-    iniset $TEMPEST_CONFIG volume storage_protocol smbfs
     iniset $TEMPEST_CONFIG boto build_timeout 360
 
     iniset $TEMPEST_CONFIG compute ssh_timeout 360
@@ -165,32 +181,9 @@ post_stack_bash: |
 
 tempest_tests:
   included-tests: |
-      tempest.api.volume
-      tempest.api.orchestration.stacks.test_volumes
-      tempest.api.compute.volumes
-      tempest.api.compute.admin.test_live_migration.LiveBlockMigrationTestJSON.test_iscsi_volume
-      tempest.api.compute.admin.test_live_migration.LiveBlockMigrationTestJSON.test_volume_backed_live_migration
-      tempest.api.compute.servers.test_delete_server.DeleteServersTestJSON.test_delete_server_while_in_attached_volume
-      tempest.api.compute.servers.test_server_rescue_negative.ServerRescueNegativeTestJSON.test_rescued_vm_attach_volume
-      tempest.api.compute.servers.test_server_rescue_negative.ServerRescueNegativeTestJSON.test_rescued_vm_detach_volume
-      tempest.scenario.test_encrypted_cinder_volumes
-      tempest.scenario.test_minimum_basic.TestMinimumBasicScenario.test_minimum_basic_scenario
-      tempest.scenario.test_shelve_instance.TestShelveInstance.test_shelve_volume_backed_instance
-      tempest.scenario.test_stamp_pattern.TestStampPattern.test_stamp_pattern
-      tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern.test_create_ebs_image_and_check_boot
-      tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern.test_volume_boot_pattern
-      tempest.scenario.test_volume_boot_pattern.TestVolumeBootPatternV2.test_create_ebs_image_and_check_boot
-      tempest.scenario.test_volume_boot_pattern.TestVolumeBootPatternV2.test_volume_boot_pattern
-      tempest.thirdparty.boto.test_ec2_instance_run.InstanceRunTest.test_compute_with_volumes
-      tempest.thirdparty.boto.test_ec2_volumes
-      tempest.thirdparty.boto.test_ec2_volumes
+      tempest.scenario.test_minimum_basic
+      tempest.scenario.test_stamp_pattern
+      tempest.scenario.test_volume_boot_pattern
 
-  excluded-tests: |
-      tempest.api.volume.admin.test_snapshot_manage
-      # volume extend is not supported when having snapshots
-      tempest.api.volume.test_volumes_extend.VolumesExtendTest.test_volume_extend_when_volume_has_snapshot
-      # https://bugs.launchpad.net/tempest/+bug/1691144
-      tempest.api.volume.admin.test_volume_hosts.VolumeHostsAdminTestsJSON.test_show_host
-      # exclude requested by luci, sometimes it fails reading from a diff image while the volume is attached
-      tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern
-      tempest.api.volume.test_volumes_extend.VolumesExtendAttachedTest.test_extend_attached_volume
+#  excluded-tests: |
+

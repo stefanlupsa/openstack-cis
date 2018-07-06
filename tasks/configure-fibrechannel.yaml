@@ -1,0 +1,9 @@
+- name: Get compute IP for VM
+  shell: "openstack hypervisor show {{ hostvars[item].compute_host }} -c host_ip -f value"
+  register: compute_ip
+
+- name: Set port trunk
+  shell: "/usr/local/bin/wsmancmd -s -H {{ compute_ip.stdout }} -a certificate -c {{ win_crt }} -k {{ win_key }}
+          'powershell Add-VMFibreChannelHba -VMName {{ hostvars[item].compute_instance_name }} -SanName vsan'"
+  args:
+    executable: /bin/bash
