@@ -12,6 +12,8 @@ q_ml2_tenant_network_type: vxlan
 
 neutron_agent_search_string: "Open vSwitch.*n-h.*:-)"
 
+image_urls: http://10.100.0.9/ci/cirros-0.3.4-x86_64.vhdx
+
 tempest_tests:
   included-tests: |
       tempest.
@@ -42,6 +44,7 @@ tempest_tests:
       tempest.api.compute.admin.test_server_diagnostics.ServerDiagnosticsV248Test
       tempest.api.compute.servers.test_device_tagging.TaggedAttachmentsTest.test_tagged_attachment
       tempest.api.volume.test_volumes_extend.VolumesExtendAttachedTest.test_extend_attached_volume
+      tempest.api.volume.test_volumes_extend.VolumesExtendTest.test_volume_extend_when_volume_has_snapshot
 
   isolated-tests: |
       tempest.api.compute.admin.test_servers_negative.ServersAdminNegativeTestJSON.test_resize_server_using_overlimit_ram
@@ -205,6 +208,10 @@ local_conf:
     # out what's wrong.
     [ovs]
     of_interface = ovs-ofctl
+
+    [[post-config|/$NOVA_CELLS_CONF]]
+    [api_database]
+    connection = mysql+pymysql://root:Passw0rd@127.0.0.1/nova_api?charset=utf8
 
 post_stack_bash: |
     source {{ devstack_dir.devstack }}/functions
