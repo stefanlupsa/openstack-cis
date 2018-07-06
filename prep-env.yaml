@@ -45,7 +45,7 @@
       with_items: "{{ vms }}"
 
     - name: Configure FibreChannel
-      include_tasks: tasks/configure-fibrechannel.yaml
+      include: tasks/configure-fibrechannel.yaml
       with_items: "{{ groups['all'] }}"
       when: job_type == "fc"
 
