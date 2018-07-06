@@ -1,6 +1,6 @@
 - hosts: all
   gather_facts: no
-  vars_file:
+  vars_files:
     - zuul-params.yaml
 
   tasks:
