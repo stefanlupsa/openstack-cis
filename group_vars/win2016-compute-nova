@@ -27,6 +27,10 @@ services:
 #      - refs/changes/19/426719/4
 
 
+nova_conf:
+  vif_plugging_is_fatal: true
+  vif_plugging_timeout: 120
+
 ## commented cherry pick used only for master branch
 cherry_picks:
   - project: openstack/neutron
