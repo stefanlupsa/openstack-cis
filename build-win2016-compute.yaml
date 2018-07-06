@@ -6,7 +6,7 @@
   tasks:
     - name: Configure FibreChannel
       include: tasks/configure-fibrechannel.yaml
-      with_items: "{{ groups['devstack'] }}"
+      with_items: "{{ groups['win2016-compute'] }}"
       when: job_type == "fc" and vsan_name is defined
 
 - hosts: win2016-compute
