@@ -4,6 +4,23 @@
     - zuul-params.yaml
 
   tasks:
+    - name: Include variables from job_vars/{{ zuul_project | basename }}
+      include_vars: "job_vars/{{ zuul_project | basename }}"
+      failed_when: False
+      tags: always
+
+    - name: Include variables from job_vars/{{ zuul_project | basename }}-{{ job_type }}
+      include_vars: "job_vars/{{ zuul_project | basename }}-{{ job_type }}"
+      when: job_type is defined
+      failed_when: False
+      tags: always
+
+    - name: Include variables from job_vars/{{ zuul_project | basename }}-{{ network_type }}
+      include_vars: "job_vars/{{ zuul_project | basename }}-{{ network_type }}"
+      when: job_type is not defined and network_type is defined
+      failed_when: False
+      tags: always
+
     - name: Configure FibreChannel
       include: tasks/configure-fibrechannel.yaml
       with_items: "{{ groups['win2016-compute'] }}"
