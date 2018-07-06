@@ -26,11 +26,6 @@
       loop_control:
         loop_var: vm
 
-    - name: Configure FibreChannel
-      include_tasks: tasks/configure-fibrechannel.yaml
-      with_items: "{{ groups['all'] }}"
-      when: job_type == "fc"
-
     - copy: 
         content="{{ vm_data | to_nice_yaml }}"
         dest="{{ work_dir }}/vm-data.yaml"
@@ -48,6 +43,11 @@
           {{ vm_data[item.name].ports.management.port.fixed_ips[0].ip_address }} hostname={{ item.name }} {{ item.additional_params }} compute_host={{ vm_data[item.name].server['OS-EXT-SRV-ATTR:host'] }} compute_instance_name={{ vm_data[item.name].server['OS-EXT-SRV-ATTR:instance_name'] }}
         marker: "# {mark} {{ item.name }}"
       with_items: "{{ vms }}"
-      
+
+    - name: Configure FibreChannel
+      include_tasks: tasks/configure-fibrechannel.yaml
+      with_items: "{{ groups['all'] }}"
+      when: job_type == "fc"
+
     - file: state=absent path="{{ log_path }}"
     - file: state=directory path="{{ log_path }}"
