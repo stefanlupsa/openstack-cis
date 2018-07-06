@@ -1,4 +1,14 @@
 ---
+- hosts: 127.0.0.1
+  vars_files:
+    - zuul-params.yaml
+
+  tasks:
+    - name: Configure FibreChannel
+      include: tasks/configure-fibrechannel.yaml
+      with_items: "{{ groups['devstack'] }}"
+      when: job_type == "fc" and vsan_name is defined
+
 - hosts: devstack
   vars_files: 
     - zuul-params.yaml

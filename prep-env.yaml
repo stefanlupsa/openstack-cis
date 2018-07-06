@@ -44,10 +44,5 @@
         marker: "# {mark} {{ item.name }}"
       with_items: "{{ vms }}"
 
-    - name: Configure FibreChannel
-      include: tasks/configure-fibrechannel.yaml
-      with_items: "{{ groups['all'] }}"
-      when: job_type == "fc"
-
     - file: state=absent path="{{ log_path }}"
     - file: state=directory path="{{ log_path }}"

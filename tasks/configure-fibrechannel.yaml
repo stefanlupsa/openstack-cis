@@ -1,10 +1,26 @@
 ---
+  - name: Turn off VMs
+    os_server_action:
+      action: stop
+      server: "{{ hostvars[item].hostname }}"
+
   - name: Get compute IP for VM
     shell: "openstack hypervisor show {{ hostvars[item].compute_host }} -c host_ip -f value"
     register: compute_ip
 
   - name: Configure FibreChannel adapter
     shell: "/usr/local/bin/wsmancmd -s -H {{ compute_ip.stdout }} -a certificate -c {{ win_crt }} -k {{ win_key }}
-            'powershell Add-VMFibreChannelHba -VMName {{ hostvars[item].compute_instance_name }} -SanName vsan'"
+            'powershell Add-VMFibreChannelHba -VMName {{ hostvars[item].compute_instance_name }} -SanName {{ vsan_name }}'"
     args:
       executable: /bin/bash
+
+  - name: Turn on VMs
+    os_server_action:
+      action: start
+      server: "{{ hostvars[item].hostname }}"
+
+  - name: Wait for VMs to be reachable
+    wait_for_connection:
+      delay: 3
+      timeout: 60
+      sleep: 15
