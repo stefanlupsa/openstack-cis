@@ -12,8 +12,6 @@ q_ml2_tenant_network_type: vxlan
 
 neutron_agent_search_string: "Open vSwitch.*n-h.*:-)"
 
-image_urls: http://10.100.0.9/ci/cirros-0.3.4-x86_64.vhdx
-
 tempest_tests:
   included-tests: |
       tempest.
