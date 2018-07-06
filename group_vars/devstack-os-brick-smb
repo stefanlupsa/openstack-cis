@@ -67,8 +67,8 @@ local_conf:
   block_migration: True
   tenant_vlan_range: "{{ vlan_range }}"
   enable_tenant_vlans: false
- enable_tenant_tunnels: true
- q_ml2_tenant_network_type: vxlan
+  enable_tenant_tunnels: true
+  q_ml2_tenant_network_type: vxlan
   image_urls: "{{ image_urls }}"
   append: |
     ATTACH_ENCRYPTED_VOLUME_AVAILABLE=False
