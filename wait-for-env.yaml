@@ -1,6 +1,21 @@
 - hosts: all
   gather_facts: no
+  vars_files:
+    - zuul_params.yaml
+
   tasks:
+
+  - name: Wait for all VMs to be reachable
+    wait_for_connection:
+      delay: 3
+      timeout: 600
+      sleep: 15
+
+  - name: Configure FibreChannel
+    include: tasks/configure-fibrechannel.yaml
+    with_items: "{{ groups['all'] }}"
+    delegate_to: localhost
+    when: job_type == "fc" and vsan_name is defined
 
   - name: Wait for all VMs to be reachable
     wait_for_connection:
