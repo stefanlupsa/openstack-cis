@@ -12,6 +12,12 @@ zuul_head_only: True
 #      - refs/changes/41/403641/4
 #      - refs/changes/19/426719/4
 
+python_packages:
+  - virtualenv
+  - netaddr
+  - netifaces
+  - python-3parclient
+
 local_conf:
   enable_services:
     - rabbit
