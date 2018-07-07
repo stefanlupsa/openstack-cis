@@ -19,17 +19,17 @@
   - name: Turn off VMs
     os_server_action:
       action: stop
-      server: "{{ hostvars[item].hostname }}"
+      server: "{{ hostvars[node].hostname }}"
     delegate_to: localhost
 
   - name: Get compute IP for VM
-    shell: "openstack hypervisor show {{ hostvars[item].compute_host }} -c host_ip -f value"
+    shell: "openstack hypervisor show {{ hostvars[node].compute_host }} -c host_ip -f value"
     register: compute_ip
     delegate_to: localhost
 
   - name: Configure FibreChannel adapter
     shell: "/usr/local/bin/wsmancmd -s -H {{ compute_ip.stdout }} -a certificate -c {{ win_crt }} -k {{ win_key }}
-            'powershell Add-VMFibreChannelHba -VMName {{ hostvars[item].compute_instance_name }} -SanName {{ vsan_name }}'"
+            'powershell Add-VMFibreChannelHba -VMName {{ hostvars[node].compute_instance_name }} -SanName {{ vsan_name }}'"
     args:
       executable: /bin/bash
     delegate_to: localhost
@@ -37,5 +37,5 @@
   - name: Turn on VMs
     os_server_action:
       action: start
-      server: "{{ hostvars[item].hostname }}"
+      server: "{{ hostvars[node].hostname }}"
     delegate_to: localhost
