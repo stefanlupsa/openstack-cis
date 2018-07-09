@@ -37,3 +37,4 @@
       delay: 3
       timeout: 120
       sleep: 15
+    when: job_type == "fc" and vsan_name is defined
