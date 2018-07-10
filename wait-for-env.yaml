@@ -32,7 +32,7 @@
   - name: Include variables from job_vars/{{ zuul_project | basename }}-{{ network_type }}
     include_vars: "job_vars/{{ zuul_project | basename }}-{{ network_type }}"
     failed_when: False
-    when: (vsan_name is defined and vsan_name) and (job_type == "fc" and job_type)
+    when: job_type is not defined and network_type is defined
     tags: always
 
   - name: Configure FibreChannel
@@ -54,4 +54,4 @@
       delay: 3
       timeout: 120
       sleep: 15
-    when: job_type == "fc" and (vsan_name is defined and vsan_name)
+    when: (vsan_name is defined and vsan_name) and (job_type == "fc" and job_type)
