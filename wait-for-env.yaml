@@ -40,7 +40,7 @@
     with_items: "{{ groups['all'] }}"
     loop_control:
       loop_var: node
-    when: job_type == "fc" and vsan_name is defined
+    when: job_type == "fc" and (vsan_name is defined and vsan_name)
 
 - hosts: all
   gather_facts: no
@@ -54,4 +54,4 @@
       delay: 3
       timeout: 120
       sleep: 15
-    when: job_type == "fc" and vsan_name is defined
+    when: job_type == "fc" and (vsan_name is defined and vsan_name)
