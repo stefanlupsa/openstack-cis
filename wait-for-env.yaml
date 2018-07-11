@@ -1,5 +1,8 @@
 - hosts: all
   gather_facts: no
+  vars_files:
+    - zuul-params.yaml
+
   tasks:
 
   - name: Wait for all VMs to be reachable
@@ -7,3 +10,48 @@
       delay: 3
       timeout: 600
       sleep: 15
+
+- hosts: 127.0.0.1
+  gather_facts: no
+  vars_files:
+    - zuul-params.yaml
+
+  tasks:
+
+  - name: Include variables from job_vars/{{ zuul_project | basename }}
+    include_vars: "job_vars/{{ zuul_project | basename }}"
+    failed_when: False
+    tags: always
+
+  - name: Include variables from job_vars/{{ zuul_project | basename }}-{{ job_type }}
+    include_vars: "job_vars/{{ zuul_project | basename }}-{{ job_type }}"
+    failed_when: False
+    when: job_type is defined
+    tags: always
+
+  - name: Include variables from job_vars/{{ zuul_project | basename }}-{{ network_type }}
+    include_vars: "job_vars/{{ zuul_project | basename }}-{{ network_type }}"
+    failed_when: False
+    when: job_type is not defined and network_type is defined
+    tags: always
+
+  - name: Configure FibreChannel
+    include: tasks/configure-fibrechannel.yaml
+    with_items: "{{ groups['all'] }}"
+    loop_control:
+      loop_var: node
+    when: (vsan_name is defined and vsan_name) and (job_type == "fc" and job_type)
+
+- hosts: all
+  gather_facts: no
+  vars_files:
+    - zuul-params.yaml
+
+  tasks:
+
+  - name: Wait for all VMs to be reachable
+    wait_for_connection:
+      delay: 3
+      timeout: 120
+      sleep: 15
+    when: (vsan_name is defined and vsan_name) and (job_type == "fc" and job_type)

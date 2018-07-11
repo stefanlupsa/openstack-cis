@@ -25,6 +25,7 @@
       timeout: 600
       userdata: "{{ vm.userdata }}"
       flavor: "{{ vm.flavor }}"
+      availability_zone: "{{ vm.availability_zone | default('nova') }}"
       config_drive: yes
       nics:
         - port-id: "{{ create_mgmt_port_out.port.id }}"
