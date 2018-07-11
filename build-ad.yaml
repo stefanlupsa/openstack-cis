@@ -5,6 +5,16 @@
     - group_vars/windows
 
   tasks:
+
+  - name: Disable firewall for Domain, Public and Private profiles
+    win_firewall:
+      state: disabled
+      profiles:
+      - Domain
+      - Private
+      - Public
+    tags: disable_firewall
+
   - name: Set administrator password to {{ ansible_ssh_pass }}
     win_shell: "net user administrator {{ ansible_ssh_pass }}"
 
