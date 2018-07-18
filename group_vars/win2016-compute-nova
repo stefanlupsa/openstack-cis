@@ -26,10 +26,6 @@ services:
 #      - refs/changes/41/403641/4
 #      - refs/changes/19/426719/4
 
-ovsdb_connection: "tcp:127.0.0.1:6640"
-of_interface: "native"
-ovsdb_interface: "native"
-
 vif_plugging_is_fatal: "false"
 vif_plugging_timeout: 10
 
@@ -38,7 +34,7 @@ cherry_picks:
   - project: openstack/neutron
     path: "{{ win_dir.build }}\\neutron"
     patches:
-      - refs/changes/21/567621/9
+      - refs/changes/21/567621/12
 
 compute_driver: hyperv.driver.HyperVDriver
 

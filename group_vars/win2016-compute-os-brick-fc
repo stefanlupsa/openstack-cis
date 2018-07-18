@@ -21,7 +21,7 @@ cherry_picks:
   - project: openstack/neutron
     path: "{{ win_dir.build }}\\neutron"
     patches:
-      - refs/changes/21/567621/7
+      - refs/changes/21/567621/12
 #  - project: openstack/cinder
 #    path: "{{ win_dir.build }}\\cinder"
 #    patches:
