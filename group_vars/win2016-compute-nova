@@ -26,8 +26,8 @@ services:
 #      - refs/changes/41/403641/4
 #      - refs/changes/19/426719/4
 
-vif_plugging_is_fatal: "false"
-vif_plugging_timeout: 10
+vif_plugging_is_fatal: "true"
+vif_plugging_timeout: 60
 
 ## commented cherry pick used only for master branch
 cherry_picks:
@@ -35,6 +35,10 @@ cherry_picks:
     path: "{{ win_dir.build }}\\neutron"
     patches:
       - refs/changes/21/567621/12
+  - project: openstack/nova
+    path: "{{ win_dir.build }}\\nova"
+    patches:
+      - refs/changes/61/585661/1
 
 compute_driver: hyperv.driver.HyperVDriver
 
