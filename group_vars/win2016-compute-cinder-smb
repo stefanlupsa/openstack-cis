@@ -27,8 +27,8 @@ services:
     name: cinder-backup
     description: OpenStack Cinder Backup Service
     binary: "{{ win_dir.python }}\\scripts\\cinder-backup.exe"
-    config: "{{ win_dir.etc }}\\cinder.conf"
-    template: cinder.conf
+    config: "{{ win_dir.etc }}\\cinder-backup.conf"
+    template: cinder-backup.conf
 
 python_packages:
   - pymysql
@@ -38,7 +38,7 @@ cherry_picks:
   - project: openstack/neutron
     path: "{{ win_dir.build }}\\neutron"
     patches:
-      - refs/changes/21/567621/12
+      - refs/changes/21/567621/13
 
 compute_driver: compute_hyperv.driver.HyperVDriver
 data_bridge_ovs: br-ethernet

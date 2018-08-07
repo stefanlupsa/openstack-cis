@@ -157,6 +157,7 @@ post_stack_bash: |
     iniset $TEMPEST_CONFIG volume build_timeout 360
     iniset $TEMPEST_CONFIG volume manage_volume_ref "source-name, //127.0.0.1/smbshare/volume-%s.vhdx"
     iniset $TEMPEST_CONFIG volume storage_protocol smbfs
+    iniset $TEMPEST_CONFIG volume vendor_name Microsoft
     iniset $TEMPEST_CONFIG boto build_timeout 360
 
     iniset $TEMPEST_CONFIG compute ssh_timeout 360
