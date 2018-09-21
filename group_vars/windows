@@ -18,6 +18,7 @@ win_dir:
   python: 'c:\python27'
   pip: 'C:\ProgramData\pip'
   instances: 'C:\openstack\instances'
+  event_log: 'c:\openstack\log\event-log'
 
 
 vif_plugging_is_fatal: "false"

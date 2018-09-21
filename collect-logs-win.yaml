@@ -1,6 +1,6 @@
 - hosts: win2016-compute,win2016-cinder
 
-  vars_files: 
+  vars_files:
     - zuul-params.yaml
 
   tasks:
@@ -17,7 +17,7 @@
     - name: Include variables from group_vars/devstack-{{ zuul_project | basename }}
       include_vars: "group_vars/devstack-{{ zuul_project | basename }}"
       failed_when: False
-      tags: always 
+      tags: always
 
     - name: Include variables from group_vars/devstack-{{ zuul_project | basename }}-{{ job_type }}
       include_vars: "group_vars/devstack-{{ zuul_project | basename }}-{{ job_type }}"
@@ -70,6 +70,25 @@
       failed_when: False
       tags: always
 
+    - name: Add collect-event-log powershell script and fe configs
+      win_template:
+        src: "windows/{{ item }}"
+        dest: "C:\\{{ item }}"
+      with_items: ["eventlogcss.txt", "eventlogjs.txt", "collect-event-log.ps1"]
+      failed_when: False
+
+    - name: Execute collect-event-log script
+      win_shell: "C:\\collect-event-log.ps1"
+      failed_when: False
+
+    - name: Copy cloudinit logs in log dir
+      win_copy:
+        src: "C:\\Program Files\\Cloudbase Solutions\\Cloudbase-Init\\log\\{{ item }}"
+        dest: "{{ win_dir.log }}\\{{ item }}"
+        remote_src: yes
+      with_items: ["cloudbase-init.log", "cloudbase-init-unattend.log"]
+      failed_when: False
+
     - name: Get log files
       shell: |
         if [ ! -d "{{ item.value.dest }}" ];then
@@ -109,5 +128,4 @@
           src: '\openstack\etc'
       ignore_errors: True
       delegate_to: 127.0.0.1
-
 

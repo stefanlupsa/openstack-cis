@@ -35,10 +35,6 @@ cherry_picks:
     path: "{{ win_dir.build }}\\neutron"
     patches:
       - refs/changes/21/567621/13
-  - project: openstack/nova
-    path: "{{ win_dir.build }}\\nova"
-    patches:
-      - refs/changes/61/585661/1
 
 compute_driver: hyperv.driver.HyperVDriver
 
