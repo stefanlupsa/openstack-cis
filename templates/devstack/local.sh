@@ -10,7 +10,8 @@ nova flavor-delete 451 || echo "Flavor 42 not found"
 
 nova flavor-create m1.nano 42 256 1 1
 nova flavor-create m1.micro 84 256 2 1
-nova flavor-create m1.heat 451 512 5 1
+nova flavor-create m1.heat 451 512 1 1
+nova flavor-create m1.heat2 452 1024 1 1
 
 echo "After updating nova flavors:"
 nova flavor-list

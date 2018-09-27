@@ -161,6 +161,8 @@ post_stack_bash: |
     TEMPEST_CONFIG={{ devstack_dir.stack }}/tempest/etc/tempest.conf
     iniset $TEMPEST_CONFIG compute volume_device_name "sdb"
     iniset $TEMPEST_CONFIG compute min_compute_nodes {{ win2016_compute_nodes | length }}
+    iniset $TEMPEST_CONFIG compute flavor_ref 452
+    iniset $TEMPEST_CONFIG compute flavor_ref_alt 451
     iniset $TEMPEST_CONFIG compute-feature-enabled rdp_console true
     iniset $TEMPEST_CONFIG compute-feature-enabled block_migrate_cinder_iscsi False
     iniset $TEMPEST_CONFIG compute-feature-enabled block_migration_for_live_migration False
@@ -171,9 +173,11 @@ post_stack_bash: |
     iniset $TEMPEST_CONFIG scenario img_dir "/home/ubuntu/devstack/files/"
     iniset $TEMPEST_CONFIG scenario img_file "{{ local_conf.image_urls | basename }}"
     iniset $TEMPEST_CONFIG scenario img_disk_format vhdx
+    iniset $TEMPEST_CONFIG scenario dhcp_client dhclient
 
     IMAGE_REF=`iniget $TEMPEST_CONFIG compute image_ref`
     iniset $TEMPEST_CONFIG compute image_ref_alt $IMAGE_REF
+    iniset $TEMPEST_CONFIG validation image_ssh_user ubuntu
 
     iniset $TEMPEST_CONFIG compute build_timeout 360
     iniset $TEMPEST_CONFIG orchestration build_timeout 360
