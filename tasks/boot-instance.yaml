@@ -36,4 +36,16 @@
     set_fact:
       vm_data: "{{ vm_data | default({}) | combine( {vm.name: { 'server': vm_create_out.server, 'ports': { 'management': create_mgmt_port_out, 'dataplane': create_data_port_out }}} ) }}"
 
+  - name: get tags from job_vars
+    set_fact: tags={{ vm.tags }}
+    failed_when: False
 
+  - name: add debug tag for debug env instances
+    set_fact: tags={{ tags + ' debug' }}
+    when: debug_job
+    failed_when: False
+
+  - name: Add tags on instance
+    shell: |
+      nova server-tag-set {{ vm_create_out.id }} {{ tags }}
+    failed_when: False

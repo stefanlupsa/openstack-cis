@@ -6,6 +6,7 @@ vms:
     inventory_group: devstack
     additional_params: 'ansible_ssh_private_key_file=/home/jenkins-slave/.ssh/id_rsa.pem ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"'
     userdata: ""
+    tags: "dv-{{ zuul_project | basename }}-{{ zuul_change }}-{{ zuul_patchset }}-{{ job_type }}"
   - hv2016-compute: 
     name: "hv-cinder-{{ zuul_change }}-{{ zuul_patchset }}-{{ job_type }}"
     image: win2016-hypervrole
@@ -13,6 +14,7 @@ vms:
     inventory_group: win2016-compute
     additional_params: "ansible_winrm_cert_pem=/home/jenkins-slave/ssl/ssl_winrm.crt ansible_winrm_cert_key_pem=/home/jenkins-slave/ssl/ssl_winrm.key ansible_winrm_transport=certificate ansible_ssh_user=administrator ansible_connection=winrm ansible_winrm_server_cert_validation=ignore ansible_ssh_port=5986"
     userdata: "{{ lookup('file', '/home/jenkins-slave/ssl/ssl_winrm.crt') }}"
+    tags: "hv-{{ zuul_project | basename }}-{{ zuul_change }}-{{ zuul_patchset }}-{{ job_type }}"
 
 win_crt: /home/jenkins-slave/ssl/ssl_winrm.crt
 win_key: /home/jenkins-slave/ssl/ssl_winrm.key
