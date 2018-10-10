@@ -46,3 +46,4 @@
 
     - file: state=absent path="{{ log_path }}"
     - file: state=directory path="{{ log_path }}"
+    - file: state=directory path="{{ log_path }}/ara-report"

@@ -44,6 +44,10 @@
         done
       failed_when: False
 
+    - name: Generate ara static report
+      command: "ara generate html {{ log_path }}/ara-report"
+      failed_when: False
+
     - name: Set log destination for debug job
       set_fact: log_dst="/srv/logs/debug/{{ zuul_project | basename }}/{{ zuul_change }}/{{ zuul_patchset }}/{{ lookup('pipe', 'date +%Y-%m-%d-%H-%M-%S') }}"
       when: debug_job is defined and debug_job and job_type is not defined

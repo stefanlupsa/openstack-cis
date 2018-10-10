@@ -1,4 +1,4 @@
-  - name: Add "openstack/networking-hyperv" project to git_prep_projects
+  - name: Add "bridge-utils" package to apt_packages if network_type is hyperv
     set_fact:
       apt_packages: "{{ apt_packages }} + [ 'bridge-utils' ]"
     when: network_type == "hyperv"
