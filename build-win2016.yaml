@@ -107,9 +107,6 @@
     - name: Update setuptools
       win_shell: "pip install -c {{ win_dir.build }}\\requirements\\upper-constraints.txt -U setuptools"
 
-    - name: Change pbr version from 4.0.0 to 3.1.1
-      win_shell: '(gc {{ win_dir.build }}\\requirements\\upper-constraints.txt) -replace "^pbr.*", "pbr===3.1.1" | Set-Content {{ win_dir.build }}\\requirements\\upper-constraints.txt'
-
     - name: Change os-vif version from 1.12.0 to 1.11.0
       win_shell: '(gc {{ win_dir.build }}\\requirements\\upper-constraints.txt) -replace "^os-vif.*", "os-vif===1.11.0" | Set-Content {{ win_dir.build }}\\requirements\\upper-constraints.txt'
 
