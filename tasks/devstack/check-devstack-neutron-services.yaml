@@ -10,7 +10,7 @@
             openstack network agent list
             exit 1
         fi
-        neutron agent-list
+        openstack network agent list
       args:
         executable: /bin/bash
       register: neutron_service_check
