@@ -5,7 +5,7 @@
     - name: Check if neutron agents are up, looking for {{ win2016_compute_nodes | length }} compute nodes
       shell: |
         source /home/ubuntu/keystonerc
-        NEUTRON_COUNT=$(neutron agent-list | grep -c "{{ neutron_agent_search_string }}")
+        NEUTRON_COUNT=$(openstack network agent list | grep -c "{{ neutron_agent_search_string }}")
         if [ $NEUTRON_COUNT -ne "{{ win2016_compute_nodes | length }}" ];then
             neutron agent-list
             exit 1
