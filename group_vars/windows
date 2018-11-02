@@ -21,8 +21,8 @@ win_dir:
   event_log: 'c:\openstack\log\event-log'
 
 
-vif_plugging_is_fatal: "false"
-vif_plugging_timeout: 10
+vif_plugging_is_fatal: "true"
+vif_plugging_timeout: 60
 
 neutron_ovs_agent:
   - neutron:

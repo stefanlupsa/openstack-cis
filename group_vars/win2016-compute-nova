@@ -26,8 +26,6 @@ services:
 #      - refs/changes/41/403641/4
 #      - refs/changes/19/426719/4
 
-vif_plugging_is_fatal: "true"
-vif_plugging_timeout: 60
 
 ## commented cherry pick used only for master branch
 cherry_picks:

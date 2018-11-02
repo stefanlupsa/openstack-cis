@@ -7,7 +7,7 @@
         source /home/ubuntu/keystonerc
         NEUTRON_COUNT=$(openstack network agent list | grep -c "{{ neutron_agent_search_string }}")
         if [ $NEUTRON_COUNT -ne "{{ win2016_compute_nodes | length }}" ];then
-            neutron agent-list
+            openstack network agent list
             exit 1
         fi
         neutron agent-list

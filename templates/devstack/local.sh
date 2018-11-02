@@ -4,17 +4,17 @@ set -e
 echo "Before updating nova flavors:"
 openstack flavor list
 
-openstack flavor delete 42 || echo "Flavor 42 not found"
-openstack flavor delete 84 || echo "Flavor 42 not found"
-openstack flavor delete 451 || echo "Flavor 42 not found"
+nova flavor-delete 42 || echo "Flavor 42 not found"
+nova flavor-delete 84 || echo "Flavor 84 not found"
+nova flavor-delete 451 || echo "Flavor 451 not found"
 
-openstack flavor create m1.nano 42 256 1 1
-openstack flavor create m1.micro 84 256 2 1
-openstack flavor create m1.heat 451 512 1 1
-openstack flavor create m1.heat2 452 1024 1 1
+nova flavor-create m1.nano 42 256 1 1
+nova flavor-create m1.micro 84 256 2 1
+nova flavor-create m1.heat 451 512 1 1
+nova flavor-create m1.heat2 452 1024 1 1
 
 echo "After updating nova flavors:"
-openstack flavor list
+nova flavor-list
 
 # Add DNS config to the private network
 subnet_id=`openstack network show private | grep subnets | awk '{print $4}'`
