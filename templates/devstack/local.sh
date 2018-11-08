@@ -27,6 +27,9 @@ echo "Neutron subnetworks:"
 openstack subnet list
 for subnet in `openstack subnet list | grep -v '\-\-' |grep -v "ID" |awk {'print $2'}`; do openstack subnet show $subnet; done
 
+# NAT VM internet traffic 
+sudo /sbin/iptables -t nat -A POSTROUTING -s 172.24.4.0/24 -o eth0 -j MASQUERADE
+
 {% if localsh_append is defined %}
 {{ localsh_append }}
 {% endif %}
