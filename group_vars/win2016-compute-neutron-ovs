@@ -6,6 +6,7 @@ git_prep_projects:
   - openstack/neutron
   - openstack/compute-hyperv
   - openstack/os-win
+  - openstack/networking-hyperv
   
 services:
   - nova:
