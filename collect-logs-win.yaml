@@ -89,7 +89,7 @@
       with_items: ["cloudbase-init.log", "cloudbase-init-unattend.log"]
       failed_when: False
 
-    - name: Copy cloudinit logs in log dir
+    - name: Collect ovs logs in log dir
       win_copy:
         src: "C:\\Program Files\\Cloudbase Solutions\\Open vSwitch\\logs\\{{ item }}"
         dest: "{{ win_dir.log }}\\{{ item }}"
