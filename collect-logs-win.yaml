@@ -89,6 +89,14 @@
       with_items: ["cloudbase-init.log", "cloudbase-init-unattend.log"]
       failed_when: False
 
+    - name: Stop ovs services
+      win_service:
+        name: "{{ item }}"
+        state: stopped
+        force_dependent_services: yes
+      with_items: ["ovsdb-server", "ovs-vswitchd"]
+      failed_when: False
+
     - name: Collect ovs logs in log dir
       win_copy:
         src: "C:\\Program Files\\Cloudbase Solutions\\Open vSwitch\\logs\\{{ item }}"
