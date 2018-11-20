@@ -1,3 +1,27 @@
+vms:
+  - devstack: 
+    name: "dv-osbrick-{{ zuul_change }}-{{ zuul_patchset }}-{{ job_type }}"
+    image: ubuntu1604
+    flavor: ci-devstack
+    inventory_group: devstack
+    additional_params: 'ansible_ssh_private_key_file=/home/jenkins-slave/.ssh/id_rsa.pem ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"'
+    userdata: ""
+    tags: "dv-{{ zuul_project | basename }}-{{ zuul_change }}-{{ zuul_patchset }}-{{ job_type }}"
+  - hv2016-compute: 
+    name: "hv-osbrick-{{ zuul_change }}-{{ zuul_patchset }}-{{ job_type }}"
+    image: win2016-hypervrole
+    flavor: ci-win2016hv
+    inventory_group: win2016-compute
+    additional_params: "ansible_winrm_cert_pem=/home/jenkins-slave/ssl/ssl_winrm.crt ansible_winrm_cert_key_pem=/home/jenkins-slave/ssl/ssl_winrm.key ansible_winrm_transport=certificate ansible_ssh_user=administrator ansible_connection=winrm ansible_winrm_server_cert_validation=ignore ansible_ssh_port=5986"
+    userdata: "{{ lookup('file', '/home/jenkins-slave/ssl/ssl_winrm.crt') }}"
+    tags: "hv-{{ zuul_project | basename }}-{{ zuul_change }}-{{ zuul_patchset }}-{{ job_type }}"
+
+win_crt: /home/jenkins-slave/ssl/ssl_winrm.crt
+win_key: /home/jenkins-slave/ssl/ssl_winrm.key
+log_key: /home/jenkins-slave/.ssh/id_rsa_log.pem
+log_path: /tmp/build_logs/{{ zuul_change }}-{{ zuul_patchset }}/{{ job_type }}
+
+## devstack
 zuul_head_only: True
 
 #cherry_picks:
@@ -11,7 +35,6 @@ zuul_head_only: True
 #    patches:
 #      - refs/changes/41/403641/4
 #      - refs/changes/19/426719/4
-
 
 local_conf:
   enable_services:
@@ -53,8 +76,8 @@ local_conf:
     - tempest
 
   disable_services:
-    - c-bak
     - c-vol
+    - c-bak
     - n-obj
     - n-novnc
     - n-net
@@ -160,7 +183,6 @@ post_stack_bash: |
     iniset $TEMPEST_CONFIG compute build_timeout 360
     iniset $TEMPEST_CONFIG orchestration build_timeout 360
     iniset $TEMPEST_CONFIG volume build_timeout 360
-    iniset $TEMPEST_CONFIG volume vendor_name Microsoft
     iniset $TEMPEST_CONFIG boto build_timeout 360
 
     iniset $TEMPEST_CONFIG compute ssh_timeout 360
@@ -169,35 +191,59 @@ post_stack_bash: |
 
 tempest_tests:
   included-tests: |
-      tempest.api.volume
-      tempest.api.orchestration.stacks.test_volumes
-      tempest.api.compute.volumes
-      tempest.api.compute.admin.test_live_migration.LiveBlockMigrationTestJSON.test_iscsi_volume
-      tempest.api.compute.admin.test_live_migration.LiveBlockMigrationTestJSON.test_volume_backed_live_migration
-      tempest.api.compute.servers.test_delete_server.DeleteServersTestJSON.test_delete_server_while_in_attached_volume
-      tempest.api.compute.servers.test_server_rescue_negative.ServerRescueNegativeTestJSON.test_rescued_vm_attach_volume
-      tempest.api.compute.servers.test_server_rescue_negative.ServerRescueNegativeTestJSON.test_rescued_vm_detach_volume
-      tempest.scenario.test_encrypted_cinder_volumes
-      tempest.scenario.test_minimum_basic.TestMinimumBasicScenario.test_minimum_basic_scenario
-      tempest.scenario.test_shelve_instance.TestShelveInstance.test_shelve_volume_backed_instance
-      tempest.scenario.test_stamp_pattern.TestStampPattern.test_stamp_pattern
-      tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern.test_create_ebs_image_and_check_boot
-      tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern.test_volume_boot_pattern
-      tempest.scenario.test_volume_boot_pattern.TestVolumeBootPatternV2.test_create_ebs_image_and_check_boot
-      tempest.scenario.test_volume_boot_pattern.TestVolumeBootPatternV2.test_volume_boot_pattern
-      tempest.thirdparty.boto.test_ec2_instance_run.InstanceRunTest.test_compute_with_volumes
-      tempest.thirdparty.boto.test_ec2_volumes
-      tempest.thirdparty.boto.test_ec2_volumes
+      tempest.scenario.test_minimum_basic
+      tempest.scenario.test_stamp_pattern
+      tempest.scenario.test_volume_boot_pattern
 
-  excluded-tests: |
-      tempest.api.volume.admin.test_snapshot_manage.SnapshotManageAdminTest
-      # test added in https://github.com/openstack/tempest/commit/7b0eaf8f544cfbaab521a80abfff33e7b637b90d
-      # exclude until we have a fix
-      tempest.api.volume.admin.test_volumes_actions.VolumesActionsTest.test_force_detach_volume
-      # https://bugs.launchpad.net/tempest/+bug/1691144
-      tempest.api.volume.admin.test_volume_hosts.VolumeHostsAdminTestsJSON.test_show_host
-      tempest.api.volume.test_volumes_extend.VolumesExtendAttachedTest.test_extend_attached_volume
-      # feature not supported on iscsi driver
-      tempest.api.volume.admin.test_volume_manage.VolumeManageAdminTest.test_unmanage_manage_volume
-      tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern.test_volume_boot_pattern
+#  excluded-tests: |
 
+
+
+## windows
+join_ad: False
+
+win_git_prep_projects:
+  - openstack/requirements
+  - openstack/cinder
+  - openstack/nova
+  - openstack/neutron
+  - openstack/compute-hyperv
+  - openstack/os-win
+  - openstack/os-brick
+  - openstack/networking-hyperv
+
+services:
+  - nova:
+    name: nova-compute
+    description: OpenStack nova Compute Service
+    binary: "{{ win_dir.python }}\\scripts\\nova-compute.exe"
+    config: "{{ win_dir.etc }}\\nova.conf"
+    template: nova.conf
+
+  - cinder:
+    name: cinder-volume
+    description: OpenStack Cinder Volume Service
+    binary: "{{ win_dir.python }}\\scripts\\cinder-volume.exe"
+    config: "{{ win_dir.etc }}\\cinder.conf"
+    template: cinder.conf
+
+win_python_packages:
+  - pymysql
+  - ovs
+
+win_cherry_picks:
+  - project: openstack/neutron
+    path: "{{ win_dir.build }}\\neutron"
+    patches:
+      - refs/changes/21/567621/13
+
+compute_driver: compute_hyperv.driver.HyperVDriver
+data_bridge_ovs: br-ethernet
+win2016_compute_node_ip: "{{ groups['win2016-compute'][0] }}"
+
+vmswitches:
+  - name: "{{ data_bridge }}"
+    subnet: "{{ data_network }}"
+    management: False
+
+volume_driver: cinder.volume.drivers.windows.iscsi.WindowsISCSIDriver

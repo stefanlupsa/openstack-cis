@@ -85,11 +85,6 @@
         dest: "{{ win_dir.etc }}\\policy.json"
       tags: create-configs
 
-    - name: Add "openstack/networking-hyperv" project to git_prep_projects
-      set_fact:
-        git_prep_projects: "{{ git_prep_projects }} + [ 'openstack/networking-hyperv' ]"
-      when: network_type == "hyperv"
-
     - include: tasks/windows/install-utils.yaml
     - include: tasks/windows/install-python.yaml
     - include: tasks/windows/install-pip.yaml
@@ -111,11 +106,11 @@
       win_shell: '(gc {{ win_dir.build }}\\requirements\\upper-constraints.txt) -replace "^os-vif.*", "os-vif===1.11.0" | Set-Content {{ win_dir.build }}\\requirements\\upper-constraints.txt'
 
     - name: Installing pip packages
-      win_shell: "pip install -c {{ win_dir.build }}\\requirements\\upper-constraints.txt -U {{ python_packages | join(' ') }}"
-      when: python_packages is defined
+      win_shell: "pip install -c {{ win_dir.build }}\\requirements\\upper-constraints.txt -U {{ win_python_packages | join(' ') }}"
+      when: win_python_packages is defined
     
     - include: tasks/windows/install-project.yaml
-      with_items: "{{ git_prep_projects }}"
+      with_items: "{{ win_git_prep_projects }}"
       tags:  install-project
      
     - name: Start iscsi service

@@ -1,48 +1,79 @@
-cherry_picks:
-  - project: openstack/tempest
-    path: "{{ devstack_dir.stack }}/tempest"
-    patches:
-      - refs/changes/28/384528/13
-      - refs/changes/13/433213/3
+vms:
+  - devstack: 
+    name: "dv-neutron-{{ zuul_change }}-{{ zuul_patchset }}-{{ network_type }}"
+    image: ubuntu1604
+    flavor: ci-devstack
+    inventory_group: devstack
+    additional_params: 'ansible_ssh_private_key_file=/home/jenkins-slave/.ssh/id_rsa.pem ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"'
+    userdata: ""
+    tags: "dv-{{ zuul_project | basename }}-{{ zuul_change }}-{{ zuul_patchset }}-{{ network_type }}"
+  - hv2016-compute: 
+    name: "hv-neutron-{{ zuul_change }}-{{ zuul_patchset }}-{{ network_type }}"
+    image: win2016-hypervrole
+    flavor: ci-win2016hv
+    inventory_group: win2016-compute
+    additional_params: "ansible_winrm_cert_pem=/home/jenkins-slave/ssl/ssl_winrm.crt ansible_winrm_cert_key_pem=/home/jenkins-slave/ssl/ssl_winrm.key ansible_winrm_transport=certificate ansible_ssh_user=administrator ansible_connection=winrm ansible_winrm_server_cert_validation=ignore ansible_ssh_port=5986"
+    userdata: "{{ lookup('file', '/home/jenkins-slave/ssl/ssl_winrm.crt') }}"
+    tags: "hv-{{ zuul_project | basename }}-{{ zuul_change }}-{{ zuul_patchset }}-{{ network_type }}"
 
-neutron_agent_search_string: "Open vSwitch.*n-h.*:-)"
+win_crt: /home/jenkins-slave/ssl/ssl_winrm.crt
+win_key: /home/jenkins-slave/ssl/ssl_winrm.key
+log_key: /home/jenkins-slave/.ssh/id_rsa_log.pem
+log_path: /tmp/build_logs/{{ zuul_change }}-{{ zuul_patchset }}/{{ network_type }}
+
+## devstack
+#cherry_picks:
+#  - project: openstack/tempest
+#    path: "{{ devstack_dir.stack }}/tempest"
+#    patches:
+#      - refs/changes/49/383049/13
+#      - refs/changes/28/384528/10
+#      - refs/changes/13/433213/3
+#  - project: openstack-dev/devstack
+#    path: "{{ devstack_dir.devstack }}"
+#    patches:
+#      - refs/changes/25/473525/3
 
 tempest_tests:
   included-tests: |
-      tempest.
+      tempest.api.network
+      tempest.api.compute.servers.test_create_server.ServersTestJSON.test_verify_created_server_vcpus
+      tempest.api.compute.servers.test_create_server.ServersTestJSON.test_verify_duplicate_network_nics
+      tempest.api.compute.servers.test_create_server.ServersTestJSON.test_verify_multiple_nics_order
+      tempest.api.compute.servers.test_create_server.ServersTestJSON.test_verify_server_details
+      tempest.api.compute.servers.test_create_server.ServersTestManualDisk.test_verify_created_server_vcpus
+      tempest.api.compute.servers.test_create_server.ServersTestManualDisk.test_verify_duplicate_network_nics
+      tempest.api.compute.servers.test_create_server.ServersTestManualDisk.test_verify_multiple_nics_order
+      tempest.api.compute.servers.test_create_server.ServersTestManualDisk.test_verify_server_details
+      tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_lock_unlock_server
+      tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_pause_unpause_server
+      tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_reboot_server_hard
+      tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_reboot_server_soft
+      tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_resize_server_confirm
+      tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_resize_server_confirm_from_stopped
+      tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_resize_server_revert
+      # if using compute_hyperv, add test_shelve_unshelve_server
+      #tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_shelve_unshelve_server
+      tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_stop_start_server
+      tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_suspend_resume_server
+      tempest.scenario.test_minimum_basic.TestMinimumBasicScenario.test_minimum_basic_scenario
+      tempest.scenario.test_network_advanced_server_ops.TestNetworkAdvancedServerOps
+      tempest.scenario.test_network_basic_ops.TestNetworkBasicOps
+      tempest.scenario.test_server_advanced_ops.TestServerAdvancedOps.test_server_sequence_suspend_resume
+      tempest.scenario.test_server_basic_ops.TestServerBasicOps.test_server_basicops
+      tempest.scenario.test_shelve_instance.TestShelveInstance.test_shelve_instance
+      tempest.scenario.test_shelve_instance.TestShelveInstance.test_shelve_volume_backed_instance
+      tempest.scenario.test_snapshot_pattern.TestSnapshotPattern.test_snapshot_pattern
+      tempest.scenario.test_stamp_pattern.TestStampPattern.test_stamp_pattern
+      tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern.test_create_ebs_image_and_check_boot
+      tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern.test_volume_boot_pattern
+      tempest.scenario.test_volume_boot_pattern.TestVolumeBootPatternV2.test_create_ebs_image_and_check_boot
+      tempest.scenario.test_volume_boot_pattern.TestVolumeBootPatternV2.test_volume_boot_pattern
 
   excluded-tests: |
-      # See Tempest bug: https://bugs.launchpad.net/tempest/+bug/1363986
-      tempest.scenario.test_security_groups_basic_ops.TestSecurityGroupsBasicOps.test_cross_tenant_traffic
-      tempest.scenario.test_security_groups_basic_ops.TestSecurityGroupsBasicOps.test_in_tenant_traffic
-      tempest.scenario.test_security_groups_basic_ops.TestSecurityGroupsBasicOps.test_multiple_security_groups
-      tempest.scenario.test_security_groups_basic_ops.TestSecurityGroupsBasicOps.test_port_security_disable_security_group
-      tempest.scenario.test_security_groups_basic_ops.TestSecurityGroupsBasicOps.test_port_update_new_security_group
-      # Tests needing further investigation:
-      tempest.scenario.test_network_basic_ops.TestNetworkBasicOps.test_network_basic_ops
-      tempest.scenario.test_network_basic_ops.TestNetworkBasicOps.test_preserve_preexisting_port
-      tempest.scenario.test_network_basic_ops.TestNetworkBasicOps.test_router_rescheduling
-      tempest.scenario.test_network_basic_ops.TestNetworkBasicOps.test_subnet_details
-      tempest.scenario.test_network_basic_ops.TestNetworkBasicOps.test_update_instance_port_admin_state
-      tempest.scenario.test_network_basic_ops.TestNetworkBasicOps.test_update_router_admin_state
-      tempest.scenario.test_network_v6.TestGettingAddress
-      # Removed heat code from devstack tree causes orchestration tests to fail https://github.com/openstack-dev/devstack/commit/77a7296248b2aae4ce878e33e05575748e7e4131
-      tempest.api.orchestration
-      # Removed test on 31/01/2017 https://trello.com/c/TvxiYkl1/61-bug-nova-volume-id-failed-to-reach-available-status
-      tempest.api.compute.admin.test_volume_swap.TestVolumeSwap.test_volume_swap
-      # This test started failing when https://review.openstack.org/#/c/442162/ got merged
-      tempest.api.compute.admin.test_services.ServicesAdminTestJSON.test_get_service_by_service_and_host_name
-      # This functionality is not supported yet
-      tempest.api.compute.admin.test_server_diagnostics.ServerDiagnosticsTest
-      tempest.api.compute.admin.test_server_diagnostics.ServerDiagnosticsV248Test
-      tempest.api.compute.servers.test_device_tagging.TaggedAttachmentsTest.test_tagged_attachment
-      tempest.api.volume.test_volumes_extend.VolumesExtendAttachedTest.test_extend_attached_volume
-      tempest.api.volume.test_volumes_extend.VolumesExtendTest.test_volume_extend_when_volume_has_snapshot
-      tempest.api.compute.servers.test_servers.ServerShowV263Test.test_show_update_rebuild_list_server
       tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_rebuild_server
-      tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_rebuild_server_with_volume_attached
-      tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_resize_volume_backed_server_confirm
-      tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_shelve_unshelve_server
+      tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_rebuild_server_in_stop_state
+      tempest.scenario.test_network_v6.TestGettingAddress
       tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern.test_volume_boot_pattern
 
   isolated-tests: |
@@ -141,11 +172,10 @@ local_conf:
   live_migration: True
   block_migration: True
   tenant_vlan_range: "{{ vlan_range }}"
+  image_urls: "{{ image_urls }}"
   enable_tenant_vlans: false
   enable_tenant_tunnels: true
   q_ml2_tenant_network_type: vxlan
-  image_urls: "{{ image_urls }}"
-
   append: |
     SWIFT_REPLICAS=1
     SWIFT_HASH=66a3d6b56c1f479c8b4e70ab5d2014f6
@@ -241,6 +271,56 @@ post_stack_bash: |
     iniset $TEMPEST_CONFIG compute ssh_timeout 360
     iniset $TEMPEST_CONFIG compute allow_tenant_isolation True
 
-    iniset /etc/nova/nova_cell1.conf api_database connection mysql+pymysql://root:Passw0rd@127.0.0.1/nova_api?charset=utf8
-    sudo systemctl restart devstack@n-cond-cell1
 
+## windows
+join_ad: False
+### MUST ENSURE THAT openstack/requirements PROJECT IS ALWAYS ON THE FIRST POSITION in git_prep_projects VARIABLE
+win_git_prep_projects:
+  - openstack/requirements
+  - openstack/nova
+  - openstack/neutron
+  - openstack/compute-hyperv
+  - openstack/os-win
+  - openstack/networking-hyperv
+  
+services:
+  - nova:
+    name: nova-compute
+    description: OpenStack nova Compute Service
+    binary: "{{ win_dir.python }}\\scripts\\nova-compute.exe"
+    config: "{{ win_dir.etc }}\\nova.conf"
+    template: nova.conf
+
+#cherry_picks:
+#  - project: openstack/cinder
+#    path: "{{ win_dir.build }}\\cinder"
+#    patches:
+#      - refs/changes/41/403641/4
+#      - refs/changes/19/426719/4
+#  - project: openstack/os-win
+#    path: "{{ win_dir.build }}\\os-win"
+#    patches:
+#      - refs/changes/41/403641/4
+#      - refs/changes/19/426719/4
+
+
+## commented cherry pick used only for master branch
+win_cherry_picks:
+  - project: openstack/neutron
+    path: "{{ win_dir.build }}\\neutron"
+    patches:
+      - refs/changes/21/567621/13
+
+compute_driver: compute_hyperv.driver.HyperVDriver
+
+win_python_packages:
+  - ovs
+
+vmswitches:
+  - name: "{{ data_bridge }}"
+    subnet: "{{ data_network }}"
+    management: False
+
+data_bridge_ovs: br-ethernet
+win2016_compute_node_ip: "{{ groups['win2016-compute'][0] }}"
+ovs_msi_url: https://cloudbase.it/downloads/openvswitch-hyperv-2.7.0-certified.msi

@@ -5,20 +5,14 @@
 
   tasks:
 
-    - name: Include variables from job_vars/{{ zuul_project | basename }}
-      include_vars: "job_vars/{{ zuul_project | basename }}"
+    - name: Include variables from job_vars/{{ zuul_project | basename }}.yaml
+      include_vars: "job_vars/{{ zuul_project | basename }}.yaml"
       failed_when: False
       tags: always
 
-    - name: Include variables from job_vars/{{ zuul_project | basename }}-{{ job_type }}
-      include_vars: "job_vars/{{ zuul_project | basename }}-{{ job_type }}"
+    - name: Include variables from job_vars/{{ zuul_project | basename }}-{{ job_type }}.yaml
+      include_vars: "job_vars/{{ zuul_project | basename }}-{{ job_type }}.yaml"
       when: job_type is defined
-      failed_when: False
-      tags: always
-
-    - name: Include variables from job_vars/{{ zuul_project | basename }}-{{ network_type }}
-      include_vars: "job_vars/{{ zuul_project | basename }}-{{ network_type }}"
-      when: job_type is not defined and network_type is defined
       failed_when: False
       tags: always
 

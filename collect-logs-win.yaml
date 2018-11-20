@@ -14,59 +14,19 @@
       failed_when: False
       tags: always
 
-    - name: Include variables from group_vars/devstack-{{ zuul_project | basename }}
-      include_vars: "group_vars/devstack-{{ zuul_project | basename }}"
-      failed_when: False
-      tags: always
-
-    - name: Include variables from group_vars/devstack-{{ zuul_project | basename }}-{{ job_type }}
-      include_vars: "group_vars/devstack-{{ zuul_project | basename }}-{{ job_type }}"
-      when: job_type is defined
-      failed_when: False
-      tags: always
-
-    - name: Include variables from group_vars/devstack-{{ zuul_project | basename }}-{{ network_type }}
-      include_vars: "group_vars/devstack-{{ zuul_project | basename }}-{{ network_type }}"
-      when: network_type is defined and job_type is not defined
-      failed_when: False
-      tags: always
-
     - name: Include variables from group_vars/win2016-compute
       include_vars: "group_vars/win2016-compute"
       failed_when: False
       tags: always
 
-    - name: Include variables from group_vars/win2016-compute-{{ zuul_project | basename }}
-      include_vars: "group_vars/win2016-compute-{{ zuul_project | basename }}"
+    - name: Include variables from job_vars/{{ zuul_project | basename }}.yaml
+      include_vars: "job_vars/{{ zuul_project | basename }}.yaml"
       failed_when: False
       tags: always
 
-    - name: Include variables from group_vars/win2016-compute-{{ zuul_project | basename }}-{{ job_type }}
-      include_vars: "group_vars/win2016-compute-{{ zuul_project | basename }}-{{ job_type }}"
+    - name: Include variables from job_vars/{{ zuul_project | basename }}-{{ job_type }}.yaml
+      include_vars: "job_vars/{{ zuul_project | basename }}-{{ job_type }}.yaml"
       when: job_type is defined
-      failed_when: False
-      tags: always
-
-    - name: Include variables from group_vars/win2016-compute-{{ zuul_project | basename }}-{{ network_type }}
-      include_vars: "group_vars/win2016-compute-{{ zuul_project | basename }}-{{ network_type }}"
-      when: network_type is defined and job_type is not defined
-      failed_when: False
-      tags: always
-
-    - name: Include variables from job_vars/{{ zuul_project | basename }}
-      include_vars: "job_vars/{{ zuul_project | basename }}"
-      failed_when: False
-      tags: always
-
-    - name: Include variables from job_vars/{{ zuul_project | basename }}-{{ job_type }}
-      include_vars: "job_vars/{{ zuul_project | basename }}-{{ job_type }}"
-      when: job_type is defined
-      failed_when: False
-      tags: always
-
-    - name: Include variables from job_vars/{{ zuul_project | basename }}-{{ network_type }}
-      include_vars: "job_vars/{{ zuul_project | basename }}-{{ network_type }}"
-      when: job_type is not defined and network_type is defined
       failed_when: False
       tags: always
 

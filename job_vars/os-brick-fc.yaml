@@ -1,3 +1,29 @@
+vms:
+  - devstack: 
+    name: "dv-osbrick-{{ zuul_change }}-{{ zuul_patchset }}-{{ job_type }}"
+    image: ubuntu1604
+    flavor: ci-devstack
+    availability_zone: "os-brick-fc"
+    inventory_group: devstack
+    additional_params: 'ansible_ssh_private_key_file=/home/jenkins-slave/.ssh/id_rsa.pem ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"'
+    userdata: ""
+    tags: "dv-{{ zuul_project | basename }}-{{ zuul_change }}-{{ zuul_patchset }}-{{ job_type }}"
+  - hv2016-compute: 
+    name: "hv-osbrick-{{ zuul_change }}-{{ zuul_patchset }}-{{ job_type }}"
+    image: win2016-hypervrole
+    flavor: ci-win2016hv
+    availability_zone: "os-brick-fc"
+    inventory_group: win2016-compute
+    additional_params: "ansible_winrm_cert_pem=/home/jenkins-slave/ssl/ssl_winrm.crt ansible_winrm_cert_key_pem=/home/jenkins-slave/ssl/ssl_winrm.key ansible_winrm_transport=certificate ansible_ssh_user=administrator ansible_connection=winrm ansible_winrm_server_cert_validation=ignore ansible_ssh_port=5986"
+    userdata: "{{ lookup('file', '/home/jenkins-slave/ssl/ssl_winrm.crt') }}"
+    tags: "hv-{{ zuul_project | basename }}-{{ zuul_change }}-{{ zuul_patchset }}-{{ job_type }}"
+
+win_crt: /home/jenkins-slave/ssl/ssl_winrm.crt
+win_key: /home/jenkins-slave/ssl/ssl_winrm.key
+log_key: /home/jenkins-slave/.ssh/id_rsa_log.pem
+log_path: /tmp/build_logs/{{ zuul_change }}-{{ zuul_patchset }}/{{ job_type }}
+
+## devstack
 zuul_head_only: True
 
 #cherry_picks:
@@ -195,4 +221,55 @@ tempest_tests:
       tempest.scenario.test_volume_boot_pattern
 
 #  excluded-tests: |
+
+
+
+## windows
+join_ad: False
+
+win_git_prep_projects:
+  - openstack/requirements
+  - openstack/nova
+  - openstack/neutron
+  - openstack/compute-hyperv
+  - openstack/os-win
+  - openstack/os-brick
+  - openstack/networking-hyperv
+
+services:
+  - nova:
+    name: nova-compute
+    description: OpenStack nova Compute Service
+    binary: "{{ win_dir.python }}\\scripts\\nova-compute.exe"
+    config: "{{ win_dir.etc }}\\nova.conf"
+    template: nova.conf
+
+
+win_cherry_picks:
+  - project: openstack/neutron
+    path: "{{ win_dir.build }}\\neutron"
+    patches:
+      - refs/changes/21/567621/13
+#  - project: openstack/cinder
+#    path: "{{ win_dir.build }}\\cinder"
+#    patches:
+#      - refs/changes/41/403641/4
+#      - refs/changes/19/426719/4
+#  - project: openstack/os-win
+#    path: "{{ win_dir.build }}\\os-win"
+#    patches:
+#      - refs/changes/41/403641/4
+#      - refs/changes/19/426719/4
+
+win_python_packages:
+  - ovs
+
+compute_driver: compute_hyperv.driver.HyperVDriver
+data_bridge_ovs: br-ethernet
+win2016_compute_node_ip: "{{ groups['win2016-compute'][0] }}"
+
+vmswitches:
+  - name: "{{ data_bridge }}"
+    subnet: "{{ data_network }}"
+    management: False
 

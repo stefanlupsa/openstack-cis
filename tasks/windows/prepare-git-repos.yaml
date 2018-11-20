@@ -9,7 +9,7 @@
     set_fact:
       zuul_cloner_command: 'zuul-cloner --workspace {{ win_dir.build }} -m {{ win_dir.build }}\\clonemap.yaml
                            --zuul-url {{ zuul_url }} --zuul-branch {{ zuul_branch }}  
-                           {{ git_server }} {{ git_prep_projects | join(" ") }}'
+                           {{ git_server }} {{ win_git_prep_projects | join(" ") }}'
     when: zuul_head_only and zuul_head_only is defined
     tags: prepare-git-repos
 
@@ -18,7 +18,7 @@
       zuul_cloner_command: 'zuul-cloner --workspace {{ win_dir.build }} -m {{ win_dir.build }}\\clonemap.yaml
                             --zuul-project {{ zuul_project }} --zuul-ref {{ zuul_ref }}
                             --zuul-url {{ zuul_url }} --zuul-branch {{ zuul_branch }}  
-                            {{ git_server }} {{ git_prep_projects | join(" ") }}'
+                            {{ git_server }} {{ win_git_prep_projects | join(" ") }}'
     when: not zuul_head_only or zuul_head_only is not defined
     tags: prepare-git-repos
 
@@ -55,13 +55,13 @@
       ref: "{{ item.patches }}"
       path: "{{ item.path }}"
     register: cherry_pick_output
-    with_items: "{{ cherry_picks }}"
-    when: cherry_picks is defined
+    with_items: "{{ win_cherry_picks }}"
+    when: win_cherry_picks is defined
     tags: cherry-pick
 
   - name: Write cherry-picks log file
     win_copy:
       dest: "{{ win_dir.log }}\\cherry-picks.log"
       content: '{{ cherry_pick_output | to_nice_json }}'
-    when: cherry_picks is defined
+    when: win_cherry_picks is defined
     tags: cherry-pick
