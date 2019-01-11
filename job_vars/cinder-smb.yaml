@@ -267,6 +267,10 @@ win_cherry_picks:
     path: "{{ win_dir.build }}\\neutron"
     patches:
       - refs/changes/21/567621/13
+  - project: openstack/cinder
+    path: "{{ win_dir.build }}\\cinder"
+    patches:
+      - refs/changes/68/630168/1
 
 compute_driver: compute_hyperv.driver.HyperVDriver
 data_bridge_ovs: br-ethernet
