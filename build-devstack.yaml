@@ -50,6 +50,7 @@
         dest: "{{ devstack_dir.stack }}/requirements/upper-constraints.txt"
         regexp: '(^amqp+.*)'
         replace: 'amqp===2.3.2'
+      become: True
 
     - name: Applying cherry-picks
       cb_cherry_pick_devstack:
