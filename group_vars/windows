@@ -20,7 +20,6 @@ win_dir:
   instances: 'C:\openstack\instances'
   event_log: 'c:\openstack\log\event-log'
 
-
 vif_plugging_is_fatal: "true"
 vif_plugging_timeout: 60
 
@@ -39,6 +38,17 @@ neutron_hyperv_agent:
     binary: "{{ win_dir.python }}\\scripts\\neutron-hyperv-agent.exe"
     config: "{{ win_dir.etc }}\\neutron-hyperv-agent.conf"
     template: neutron-hyperv-agent.conf
+
+win_upper_constraints_pinning:
+  - os-vif:
+    project: 'os-vif'
+    value: 'os-vif===1.11.0'
+  - olsorootwrap:
+    project: 'oslo.rootwrap'
+    value: 'oslo.rootwrap===5.14.0'
+  - amqp:
+    project: 'amqp'
+    value: 'amqp===2.3.2'
 
 win_utils_bin_archive_url: http://10.100.0.9/ci/utils_bin.zip
 win_python_archive_url: http://10.100.0.9/ci/python.zip

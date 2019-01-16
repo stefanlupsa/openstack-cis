@@ -65,6 +65,11 @@
       with_items: ["ovsdb-server.log", "ovs-vswitchd.log"]
       failed_when: False
 
+    - name: Dump pip list to file
+      win_shell: |
+        pip list > "{{ win_dir.log }}\\pip-list.txt"
+      failed_when: False
+
     - name: Get log files
       shell: |
         if [ ! -d "{{ item.value.dest }}" ];then

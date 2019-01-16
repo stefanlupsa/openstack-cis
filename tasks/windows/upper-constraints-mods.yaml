@@ -1,0 +1,4 @@
+---
+  - name: Change {{ item.project }} version to {{ item.value }}
+    win_shell: '(gc {{ win_dir.build }}\\requirements\\upper-constraints.txt) -replace "^{{ item.project }}.*", "{{ item.value }}" | Set-Content {{ win_dir.build }}\\requirements\\upper-constraints.txt'
+    tags: "upper-constraints-mods"

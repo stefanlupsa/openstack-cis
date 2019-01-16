@@ -94,22 +94,16 @@
     - include: tasks/windows/install-freerdp.yaml
     - include: tasks/windows/install-zuul.yaml
     - include: tasks/windows/prepare-git-repos.yaml
-    
+
+    - include: tasks/windows/upper-constraints-mods.yaml
+      with_items: "{{ win_upper_constraints_pinning }}"
+
     - include: tasks/windows/configure-ovs.yaml
       with_items: "{{ vmswitches }}"
       when: network_type == "ovs"
     
     - name: Update setuptools
       win_shell: "pip install -c {{ win_dir.build }}\\requirements\\upper-constraints.txt -U setuptools"
-
-    - name: Change os-vif version from 1.12.0 to 1.11.0
-      win_shell: '(gc {{ win_dir.build }}\\requirements\\upper-constraints.txt) -replace "^os-vif.*", "os-vif===1.11.0" | Set-Content {{ win_dir.build }}\\requirements\\upper-constraints.txt'
-
-    - name: Change oslo.rootwrap version from 5.15.0 to 5.14.0
-      win_shell: '(gc {{ win_dir.build }}\\requirements\\upper-constraints.txt) -replace "^oslo.rootwrap.*", "oslo.rootwrap===5.14.0" | Set-Content {{ win_dir.build }}\\requirements\\upper-constraints.txt'
-
-    - name: Change amqp version from 2.4.0 to 2.3.2
-      win_shell: '(gc {{ win_dir.build }}\\requirements\\upper-constraints.txt) -replace "^amqp.*", "amqp===2.3.2" | Set-Content {{ win_dir.build }}\\requirements\\upper-constraints.txt'
 
     - name: Installing pip packages
       win_shell: "pip install -c {{ win_dir.build }}\\requirements\\upper-constraints.txt -U {{ win_python_packages | join(' ') }}"

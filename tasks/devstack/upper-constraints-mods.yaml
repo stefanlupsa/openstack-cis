@@ -1,0 +1,7 @@
+---
+  - name: Change {{ item.project }} version to {{ item.value }}
+    replace:
+      dest: "{{ devstack_dir.stack }}/requirements/upper-constraints.txt"
+      regexp: "(^{{ item.project }}+.*)"
+      replace: "{{ item.value }}"
+    become: True

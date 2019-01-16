@@ -44,13 +44,8 @@
     - include: tasks/devstack/install-zuul.yaml
     - include: tasks/devstack/prepare-git-repos.yaml
 
-    ## replace amqp version from 2.4.0 to 2.3.2
-    - name: Change amqp version from 2.4.0 to 2.3.2
-      replace:
-        dest: "{{ devstack_dir.stack }}/requirements/upper-constraints.txt"
-        regexp: '(^amqp+.*)'
-        replace: 'amqp===2.3.2'
-      become: True
+    - include: tasks/devstack/upper-constraints-mods.yaml
+      with_items: "{{ upper_constraints_pinning }}"
 
     - name: Applying cherry-picks
       cb_cherry_pick_devstack:

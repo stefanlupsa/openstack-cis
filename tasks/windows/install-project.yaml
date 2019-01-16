@@ -15,14 +15,16 @@
       project_name: "{{ project_name_output.stdout_lines[0] }}"
     tags: install-project
 
-#  - name: "Running edit-constraints for {{ project_name }} in {{ project_folder }}"
-#    win_shell: 'edit-constraints {{ win_dir.build }}\\requirements\\upper-constraints.txt -- {{ project_name }}
-#                "-e file://{{ project_folder }}#egg={{ project_name }}"'
-#    when: project_name != "openstack_requirements"
-#    tags: install-project
+  - name: Set repo_path variable
+    set_fact:
+      repo_path: '{{ win_dir.build.replace(backslash, "/") | capitalize }}'
+    when: project_name != "openstack_requirements"
+    vars:
+      backslash: "\\"
+    tags: install-project
 
   - name: "Running edit-constraints for {{ project_name }} in {{ project_folder }}"
-    win_shell: 'edit-constraints {{ win_dir.build }}\\requirements\\upper-constraints.txt -- {{ project_name }} ""'
+    win_shell: 'edit-constraints {{ win_dir.build }}\\requirements\\upper-constraints.txt -- {{ project_name }} "-e file:///{{ repo_path }}/{{ project_name }}#egg={{ project_name }}"'
     when: project_name != "openstack_requirements"
     tags: install-project
 
