@@ -64,6 +64,16 @@
         - /var/log/syslog
         - /var/log/mysql/error.log
 
+    - name: Fix permissions for log files
+      file:
+        path: "{{ log_path }}/devstack/logs/{{ item }}"
+        mode: 0644
+      ignore_errors: True
+      with_items:
+        - syslog
+        - error.log
+      delegate_to: 127.0.0.1
+
     - name: Copy conf files
       synchronize:
         mode: pull
