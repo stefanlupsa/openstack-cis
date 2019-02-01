@@ -46,6 +46,7 @@
 
     - include: tasks/devstack/upper-constraints-mods.yaml
       with_items: "{{ upper_constraints_pinning }}"
+      when: upper_constraints_pinning is defined
 
     - name: Applying cherry-picks
       cb_cherry_pick_devstack:

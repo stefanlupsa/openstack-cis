@@ -43,10 +43,8 @@ python_packages:
   - netaddr
   - netifaces
 
-upper_constraints_pinning:
-  - amqp:
-    project: 'amqp'
-    value: 'amqp===2.3.2'
+## commented upper_constraints_pinning for there is no use of it right now
+##upper_constraints_pinning:
 
 git_prep_projects:
   - openstack/keystone

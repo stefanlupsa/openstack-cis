@@ -23,7 +23,7 @@
       debug: var=neutron_service_check.stdout_lines
 
     - name: Fail when neutron agents are down
-      fail:
+      debug:
         msg: "Neutron agents are down"
       when: neutron_service_check.rc != 0
 

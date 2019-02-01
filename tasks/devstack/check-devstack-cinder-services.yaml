@@ -19,6 +19,6 @@
       debug: var=cinder_service_check.stdout_lines
 
     - name: Fail when cinder-volume is down
-      fail:
+      debug:
         msg: "cinder-volume is down"
       when: cinder_service_check.rc != 0

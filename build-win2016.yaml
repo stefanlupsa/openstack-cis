@@ -97,6 +97,7 @@
 
     - include: tasks/windows/upper-constraints-mods.yaml
       with_items: "{{ win_upper_constraints_pinning }}"
+      when: win_upper_constraints_pinning is defined
 
     - include: tasks/windows/configure-ovs.yaml
       with_items: "{{ vmswitches }}"

@@ -19,6 +19,6 @@
       debug: var=nova_service_check.stdout_lines
 
     - name: Fail when nova-compute services are down
-      fail:
+      debug:
         msg: "nova-compute services are down"
       when: nova_service_check.rc != 0
