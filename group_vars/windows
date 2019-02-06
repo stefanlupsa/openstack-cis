@@ -43,9 +43,6 @@ win_upper_constraints_pinning:
   - olsorootwrap:
     project: 'oslo.rootwrap'
     value: 'oslo.rootwrap===5.14.0'
-  - amqp:
-    project: 'amqp'
-    value: '-e git://github.com/petrutlucian94/py-amqp.git@18fd2f25fba311ee7f818fa7948dde144cb75a82#egg=amqp'
 
 win_utils_bin_archive_url: http://10.100.0.9/ci/utils_bin.zip
 win_python_archive_url: http://10.100.0.9/ci/python.zip
