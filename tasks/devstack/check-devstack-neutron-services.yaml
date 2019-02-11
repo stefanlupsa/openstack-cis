@@ -1,6 +1,7 @@
     - name: Set neutron_agent_search_string parameter
       set_fact: neutron_agent_search_string="HyperV agent.*:-)"
       when: network_type == "hyperv"
+      tags: check-services-tag
 
     - name: Check if neutron agents are up, looking for {{ win2016_compute_nodes | length }} compute nodes
       shell: |
@@ -18,12 +19,15 @@
       retries: "{{ service_check_retries }}"
       delay: "{{ service_check_delay }}"
       ignore_errors: yes
+      tags: check-services-tag
 
     - name: Show neutron agents output
       debug: var=neutron_service_check.stdout_lines
+      tags: check-services-tag
 
     - name: Fail when neutron agents are down
       debug:
         msg: "Neutron agents are down"
       when: neutron_service_check.rc != 0
+      tags: check-services-tag
 

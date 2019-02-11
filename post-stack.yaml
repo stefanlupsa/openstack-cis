@@ -189,24 +189,32 @@
     - name: Get neutron_service_check content
       set_fact:
         neutron_service_check: "{{ groups['devstack'] | map('extract', hostvars, 'neutron_service_check') | list}}"
+      tags: check-services-tag
 
     - name: Get nova_service_check content
       set_fact:
         nova_service_check: "{{ groups['devstack'] | map('extract', hostvars, 'nova_service_check') | list}}"
+      tags: check-services-tag
 
     - name: Get cinder_service_check content
       set_fact:
         cinder_service_check: "{{ groups['devstack'] | map('extract', hostvars, 'cinder_service_check') | list}}"
       when: zuul_project == "openstack/cinder" or zuul_project == "openstack/os-brick"
+      tags: check-services-tag
 
-    - include: tasks/windows/collect-traceback-neutron-services.yaml
-      when: neutron_service_check[0].rc != 0
+    - name: Set neutron hyperv agent service
+      set_fact: services={{ services + neutron_hyperv_agent }}
+      when: network_type == "hyperv"
+      tags: check-services-tag
 
-    - include: tasks/windows/collect-traceback-nova-services.yaml
-      when: nova_service_check[0].rc != 0
+    - name: Set neutron ovs agent service
+      set_fact: services={{ services + neutron_ovs_agent }}
+      when: network_type == "ovs"
+      tags: check-services-tag
 
-    - include: tasks/windows/collect-traceback-cinder-services.yaml
-      when: (zuul_project == "openstack/cinder" or zuul_project == "openstack/os-brick") and cinder_service_check[0].rc != 0
+    - include: tasks/windows/collect-service-traceback.yaml
+      with_items: "{{ services }}"
+      when: neutron_service_check[0].rc != 0 or nova_service_check[0] !=0 or ((zuul_project == "openstack/cinder" or zuul_project == "openstack/os-brick") and cinder_service_check[0].rc != 0)
 
 - hosts: devstack
   vars_files: 

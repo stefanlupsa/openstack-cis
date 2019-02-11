@@ -8,8 +8,8 @@ services:
     name: cinder-volume
     description: OpenStack Cinder Volume Service
     binary: "{{ win_dir.python }}\\scripts\\cinder-volume.exe"
-    config: "{{ win_dir.etc }}\\cinder.conf"
-    template: cinder.conf
+    config: "{{ win_dir.etc }}\\cinder-volume.conf"
+    template: cinder-volume.conf
 
 #cherry_picks:
 #  - project: openstack/cinder

@@ -1,0 +1,26 @@
+   - name: "Check if {{ item.name }}.log exists"
+     win_stat:
+       path: "{{ win_dir.log }}\\{{ item.name }}.log"
+       get_checksum: False
+     register: log_stat
+     tags: check-services-tag
+
+   - name: "Get {{ item.name }} status"
+     win_shell: 'Get-Service {{ item.name }} | %{$_.Status}'
+     register: service_status
+     tags: check-services-tag
+
+   - name: "Run {{ item.name }} binary"
+     args:
+       executable: cmd
+     win_shell: |
+       "{{ item.binary }} --config-file {{ item.config }} > {{ win_dir.log }}\\{{ item.name }}-stdout.log 2> {{ win_dir.log }}\\{{ item.name }}-stderr.log"
+     when: log_stat.stat.exists == False
+     ignore_errors: True
+     tags: check-services-tag
+
+   - name: "Fail if {{ item.name }} is down"
+     fail:
+       msg: "{{ item.name }} service is down!"
+     when: service_status.stdout_lines[0] == "Stopped"
+     tags: check-services-tag
