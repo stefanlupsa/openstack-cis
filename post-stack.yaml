@@ -63,6 +63,7 @@
         start_mode: auto
         path: "{{ win_dir.bin }}\\OpenStackService.exe {{ item.name }} {{ item.binary }} --config-file {{ item.config }}"
       with_items: "{{ services }}"
+      failed_when: False
       tags: start-services
 
 
@@ -123,6 +124,7 @@
         start_mode: auto
         path: "{{ win_dir.bin }}\\OpenStackService.exe {{ item.name }} {{ item.binary }} --config-file {{ item.config }}"
       with_items: "{{ services }}"
+      failed_when: False
       tags: start-services
 
 - hosts: ad
