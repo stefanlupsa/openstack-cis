@@ -235,6 +235,7 @@ local_conf:
     image_volume_cache_enabled = False
     lvm_type = default
     [DEFAULT]
+    backup_swift_object_size = 10485760
     quota_volumes = 10
     quota_snapshots = 10
     quota_gigabytes = 1000
