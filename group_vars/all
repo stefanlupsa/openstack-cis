@@ -4,7 +4,7 @@
 ansible_ssh_pass: Passw0rd
 ansible_become_pass: "{{ ansible_ssh_pass }}"
 
-git_server: http://git.openstack.org
+git_server: https://opendev.org
 
 get_pip_url: https://bootstrap.pypa.io/get-pip.py
   
