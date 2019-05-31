@@ -2,6 +2,7 @@
      win_stat:
        path: "{{ win_dir.log }}\\{{ item.name }}.log"
        get_checksum: False
+       get_md5: False
      register: log_stat
      tags: check-services-tag
 
