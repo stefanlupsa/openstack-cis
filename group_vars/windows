@@ -43,6 +43,10 @@ win_upper_constraints_pinning:
   - olsorootwrap:
     project: 'oslo.rootwrap'
     value: 'oslo.rootwrap===5.14.0'
+  - pbr:
+    project: 'pbr'
+    value: 'pbr===5.1.3'
+
 
 win_utils_bin_archive_url: http://10.100.0.9/ci/utils_bin.zip
 win_python_archive_url: http://10.100.0.9/ci/python.zip
