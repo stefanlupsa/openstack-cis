@@ -16,6 +16,7 @@ win_dir:
   build: 'c:\openstack\build'
   tmp: 'c:\openstack\tmp'
   python: 'c:\python27'
+  python_zuul: 'c:\python27'
   pip: 'C:\ProgramData\pip'
   instances: 'C:\openstack\instances'
   event_log: 'c:\openstack\log\event-log'
@@ -50,6 +51,7 @@ win_upper_constraints_pinning:
 
 win_utils_bin_archive_url: http://10.100.0.9/ci/utils_bin.zip
 win_python_archive_url: http://10.100.0.9/ci/python.zip
+win_python_zuul_archive_url: http://10.100.0.9/ci/python27.zip
 win_git_installer_url: http://10.100.0.9/ci/Git-2.13.2-64-bit.exe
 win_vcredist_x86_url: http://10.100.0.9/ci/vcredist_x86.exe
 win_freerdp_archive_url: http://10.100.0.9/ci/FreeRDP_powershell.zip

@@ -1,9 +1,27 @@
 ---
+  - name: Check if python-zuul archive is present
+    win_stat:
+      path: "{{ win_dir.tmp }}\\python-zuul.zip"
+    register: python_zuul_zip
+    tags: install-zuul
+
+  - name: Download python-zuul archive
+    win_get_url:
+      url: "{{ win_python_zuul_archive_url }}"
+      dest: "{{ win_dir.tmp }}\\python-zuul.zip"
+    when: python_zuul_zip.stat.exists == False     
+    tags: install-zuul
+
+  - name: Unzip python-zuul archive
+    cb_unzip:
+      src: "{{ win_dir.tmp }}\\python-zuul.zip"
+      dest: "{{ win_dir.python_zuul }}"
+    tags: install-zuul
 
   - name: Install zuul version "{{ zuul_version }}"
-    win_shell: "pip install {{ zuul_version }}"
+    win_shell: "{{ win_dir.python_zuul }}\\scripts\\pip install {{ zuul_version }}"
     args:
-        creates: "{{ win_dir.python }}\\scripts\\zuul-cloner.exe"
+        creates: "{{ win_dir.python_zuul }}\\scripts\\zuul-cloner.exe"
     tags: install-zuul
 
 

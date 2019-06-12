@@ -13,8 +13,15 @@ pip_ini_content: |
   [global]
   index-url = http://10.100.0.9:8080/cloudbase/CI/+simple/
   trusted-host = 10.100.0.9
+                 pypi.python.org
+                 pypi.org
+                 files.pythonhosted.org
   [install]
   trusted-host = 10.100.0.9
+                 pypi.python.org
+                 pypi.org
+                 files.pythonhosted.org
+
 
 # we install zuul because we need zuul-cloner for git prep
 zuul_version: zuul==2.5.2

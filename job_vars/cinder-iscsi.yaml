@@ -22,7 +22,18 @@ log_key: /home/jenkins-slave/.ssh/id_rsa_log.pem
 log_path: /tmp/build_logs/{{ zuul_change }}-{{ zuul_patchset }}/{{ job_type }}
 
 ## devstack
-zuul_head_only: True
+
+git_prep_projects:
+  - openstack/keystone
+  - openstack/glance
+  - openstack/cinder  
+  - openstack/requirements
+  - openstack/nova
+  - openstack/neutron
+  - openstack/networking-hyperv
+  - openstack/swift
+  - openstack/tempest
+  - openstack/cinder-tempest-plugin
 
 #cherry_picks:
 #  - project: openstack/cinder
@@ -96,6 +107,8 @@ local_conf:
   q_ml2_tenant_network_type: vxlan
   image_urls: "{{ image_urls }}"
   append: |
+    TEMPEST_PLUGINS=/opt/stack/cinder-tempest-plugin
+    LIBS_FROM_GIT=cinder-tempest-plugin
     ATTACH_ENCRYPTED_VOLUME_AVAILABLE=False
     SWIFT_REPLICAS=1
     SWIFT_HASH=66a3d6b56c1f479c8b4e70ab5d2014f6
@@ -211,7 +224,7 @@ tempest_tests:
       tempest.scenario.test_volume_boot_pattern.TestVolumeBootPatternV2.test_volume_boot_pattern
       tempest.thirdparty.boto.test_ec2_instance_run.InstanceRunTest.test_compute_with_volumes
       tempest.thirdparty.boto.test_ec2_volumes
-      tempest.thirdparty.boto.test_ec2_volumes
+      cinder_tempest_plugin
 
   excluded-tests: |
       tempest.api.volume.admin.test_snapshot_manage.SnapshotManageAdminTest
@@ -227,6 +240,21 @@ tempest_tests:
 
 ## windows
 join_ad: False
+
+win_dir:
+  openstack: 'c:\openstack'
+  bin: 'c:\openstack\bin'
+  log: 'c:\openstack\log'
+  etc: 'c:\openstack\etc'
+  build: 'c:\openstack\build'
+  tmp: 'c:\openstack\tmp'
+  python: 'c:\python37'
+  python_zuul: 'c:\python27'
+  pip: 'C:\ProgramData\pip'
+  instances: 'C:\openstack\instances'
+  event_log: 'c:\openstack\log\event-log'
+
+win_python_archive_url: http://10.100.0.9/ci/python37.zip
 
 win_git_prep_projects:
   - openstack/requirements
@@ -267,6 +295,8 @@ win_cherry_picks:
       - refs/changes/21/567621/13
 
 win_python_packages:
+  - pywin32
+  - pbr
   - pymysql
   - ovs
 
