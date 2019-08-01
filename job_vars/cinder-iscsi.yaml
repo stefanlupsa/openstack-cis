@@ -236,6 +236,7 @@ tempest_tests:
       tempest.api.volume.test_volumes_extend.VolumesExtendAttachedTest.test_extend_attached_volume
       # feature not supported on iscsi driver
       tempest.api.volume.admin.test_volume_manage.VolumeManageAdminTest.test_unmanage_manage_volume
+      tempest.scenario.test_stamp_pattern.TestStampPattern.test_stamp_pattern
 
 
 ## windows

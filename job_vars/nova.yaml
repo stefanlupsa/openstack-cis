@@ -83,6 +83,7 @@ tempest_tests:
       tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_rebuild_server_with_volume_attached
       tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_resize_volume_backed_server_confirm
       tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_shelve_unshelve_server
+      tempest.scenario.test_stamp_pattern.TestStampPattern.test_stamp_pattern
 
   isolated-tests: |
       tempest.api.compute.admin.test_servers_negative.ServersAdminNegativeTestJSON.test_resize_server_using_overlimit_ram
