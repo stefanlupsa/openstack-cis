@@ -5,7 +5,17 @@
       ip route del 192.168.0.0/22 dev eth1
     become: True
     failed_when: False
-
+    
+  - name: Make sure ubuntu user has access to /opt/stack
+    file:
+      path: /opt/stack
+      state: directory
+      recurse: yes
+      owner: ubuntu
+      group: ubuntu
+      mode: '0755'
+    become: True
+      
   - name: Run stack
     shell: |
       ./unstack.sh > /dev/null 2>&1
