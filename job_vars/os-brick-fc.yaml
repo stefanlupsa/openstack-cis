@@ -103,6 +103,7 @@ local_conf:
   q_ml2_tenant_network_type: vxlan
   image_urls: "{{ image_urls }}"
   append: |
+    Q_ML2_PLUGIN_MECHANISM_DRIVERS=openvswitch
     ATTACH_ENCRYPTED_VOLUME_AVAILABLE=False
     SWIFT_REPLICAS=1
     SWIFT_HASH=66a3d6b56c1f479c8b4e70ab5d2014f6

@@ -177,6 +177,7 @@ local_conf:
   enable_tenant_tunnels: true
   q_ml2_tenant_network_type: vxlan
   append: |
+    Q_ML2_PLUGIN_MECHANISM_DRIVERS=openvswitch
     SWIFT_REPLICAS=1
     SWIFT_HASH=66a3d6b56c1f479c8b4e70ab5d2014f6
     SWIFT_START_ALL_SERVICES=False

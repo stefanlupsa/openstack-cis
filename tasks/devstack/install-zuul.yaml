@@ -6,3 +6,12 @@
       virtualenv_python: python2.7
     become: True
     tags: install-zuul
+
+  # Workaround for https://github.com/gitpython-developers/GitPython/issues/687
+  - name: Update pythongit library to version 2.1.13
+    pip:
+      virtualenv: "{{ devstack_dir.zuul }}"
+      name: "GitPython==2.1.13"
+      virtualenv_python: python2.7
+    become: True
+    tags: install-zuul
