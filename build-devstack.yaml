@@ -39,7 +39,7 @@
     - include: tasks/devstack/install-python-packages.yaml
 
     - include: tasks/devstack/find-data-port.yaml
-    - include: tasks/devstack/configure-ovs.yaml
+      #    - include: tasks/devstack/configure-ovs.yaml
 
     - include: tasks/devstack/install-zuul.yaml
     - include: tasks/devstack/prepare-git-repos.yaml
