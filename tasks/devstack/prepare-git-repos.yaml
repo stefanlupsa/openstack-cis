@@ -4,6 +4,17 @@
       dest: "{{ devstack_dir.devstack }}"
       version: "{{ zuul_branch }}"
       force: yes
+    register: devstack_clone_result
+    ignore_errors: yes
+    tags: prepare-git-repos
+
+  - name: Fallback clone devstack repo master branch from {{ devstack_repo }} to {{ devstack_dir.devstack }}
+    git:
+      repo: "{{ devstack_repo }}"
+      dest: "{{ devstack_dir.devstack }}"
+      version: "master"
+      force: yes
+    when: devstack_clone_result.rc != 0
     tags: prepare-git-repos
 
   - name: Upload zuul clonemap file
