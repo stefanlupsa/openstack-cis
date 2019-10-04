@@ -14,7 +14,7 @@
       dest: "{{ devstack_dir.devstack }}"
       version: "master"
       force: yes
-    when: devstack_clone_result.rc != 0
+    when: devstack_clone_result.rc is defined and devstack_clone_result.rc != 0
     tags: prepare-git-repos
 
   - name: Upload zuul clonemap file
