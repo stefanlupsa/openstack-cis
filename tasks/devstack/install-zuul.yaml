@@ -15,3 +15,12 @@
       virtualenv_python: python2.7
     become: True
     tags: install-zuul
+
+  # Downgrade ecds library to last working version
+  - name: Downgrade ecdsa library to version 0.13.3
+    pip:
+      virtualenv: "{{ devstack_dir.zuul }}"
+      name: "ecdsa==0.13.3"
+      virtualenv_python: python2.7
+    become: True
+    tags: install-zuul
