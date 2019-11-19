@@ -1,7 +1,7 @@
 vms:
   - devstack: 
     name: "n-d-{{ zuul_change }}-{{ zuul_patchset }}"
-    image: ubuntu1604
+    image: bionic-09.08.2019
     flavor: devstack
     inventory_group: devstack
     additional_params: 'ansible_ssh_private_key_file=/home/jenkins-slave/.ssh/id_rsa.pem ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"'
@@ -191,6 +191,7 @@ local_conf:
     SWIFT_REPLICAS=1
     SWIFT_HASH=66a3d6b56c1f479c8b4e70ab5d2014f6
     SWIFT_START_ALL_SERVICES=False
+    USE_PYTHON3=True
 
     [[post-config|$NOVA_CONF]]
     [DEFAULT]
@@ -334,7 +335,25 @@ vmswitches:
     management: False
 
 win_python_packages:
+  - pywin32
+  - pbr
+  - pymysql
   - ovs
+
+win_dir:
+  openstack: 'c:\openstack'
+  bin: 'c:\openstack\bin'
+  log: 'c:\openstack\log'
+  etc: 'c:\openstack\etc'
+  build: 'c:\openstack\build'
+  tmp: 'c:\openstack\tmp'
+  python: 'c:\python37'
+  python_zuul: 'c:\python27'
+  pip: 'C:\ProgramData\pip'
+  instances: 'C:\openstack\instances'
+  event_log: 'c:\openstack\log\event-log'
+
+win_python_archive_url: http://10.100.0.9/ci/python37.zip
 
 data_bridge_ovs: br-ethernet
 ovs_msi_url: http://10.100.0.9/ci/openvswitch-hyperv-2.7.0-certified.msi
