@@ -289,7 +289,7 @@ post_stack_bash: |
 
     # On Ubuntu 18.04, iscsid needs to be restarted before an iSCSI initiator name
     # gets generated.
-    sudo systemctl retart iscsid
+    sudo systemctl restart iscsid
 
 
 
