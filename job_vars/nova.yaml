@@ -287,6 +287,10 @@ post_stack_bash: |
     iniset /etc/nova/nova_cell1.conf api_database connection mysql+pymysql://root:Passw0rd@127.0.0.1/nova_api?charset=utf8
     sudo systemctl restart devstack@n-cond-cell1
 
+    # On Ubuntu 18.04, iscsid needs to be restarted before an iSCSI initiator name
+    # gets generated.
+    sudo systemctl retart iscsid
+
 
 
 ## windows
