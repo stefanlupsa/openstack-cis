@@ -1,3 +1,13 @@
+  - name: Create zuul virtual env
+    shell: |
+      /usr/local/bin/virtualenv --no-site-packages --no-setuptools -ppython2.7 "{{ devstack_dir.zuul }}"
+      source /opt/stack/zuul-venv/bin/activate
+      pip install setuptools==44.0.0
+    args:
+      executable: /bin/bash
+    become: True
+    tags: install-zuul
+  
   # Install zuul in a virtualenv, it messes with pbr and other openstack libraries
   - name: Install zuul version {{ zuul_version }}
     pip:
