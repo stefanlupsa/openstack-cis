@@ -3,9 +3,3 @@
       executable: pip3
       name: "{{ python_packages }}"
     become: True
-
-  - name: Install required python packages
-    pip:
-      executable: pip2
-      name: "{{ python_packages }}"
-    become: True
