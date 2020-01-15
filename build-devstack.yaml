@@ -58,7 +58,7 @@
       become: True
       tags: cherry-pick
 
-    - include: tasks/devstack/install-networking-hyperv.yaml
+    #- include: tasks/devstack/install-networking-hyperv.yaml
 
     - include: tasks/devstack/write-configs.yaml
 
