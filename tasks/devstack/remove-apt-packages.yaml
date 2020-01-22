@@ -1,0 +1,7 @@
+  - name: Remove required packages
+    apt:
+      name: "{{ item }}"
+      update_cache: yes
+      state: absent
+    become: True
+    with_items: "{{ apt_packages_remove }}"

@@ -38,6 +38,11 @@ apt_packages:
   - python3-dev
   - libpcre3-dev
 
+apt_packages_remove:
+  - python3-httplib2
+  - python3-yaml
+  - python3-pyasn1-modules
+
 python_packages:
   - virtualenv
   - netaddr

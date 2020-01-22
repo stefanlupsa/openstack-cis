@@ -34,6 +34,7 @@
     - include: tasks/devstack/run-unstack.yaml
 
     - include: tasks/devstack/install-apt-packages.yaml
+    - include: tasks/devstack/remove-apt-packages.yaml
     - include: tasks/devstack/install-pip.yaml
     - include: tasks/devstack/configure-pip-index.yaml
     - include: tasks/devstack/install-python-packages.yaml
