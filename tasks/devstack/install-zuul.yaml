@@ -34,3 +34,12 @@
       virtualenv_python: python2.7
     become: True
     tags: install-zuul
+
+  # Downgrade gitdb2 library to last working version
+  - name: Downgrade gitdb2 library to version 2.0.5
+    pip:
+      virtualenv: "{{ devstack_dir.zuul }}"
+      name: "gitdb2==2.0.5"
+      virtualenv_python: python2.7
+    become: True
+    tags: install-zuul
