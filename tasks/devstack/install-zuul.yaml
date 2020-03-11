@@ -1,12 +1,13 @@
-  - name: Make sure ubuntu user has access to /opt/stack
-    file:
-      path: /opt/stack
-      state: directory
-      recurse: yes
-      owner: ubuntu
-      group: ubuntu
-      mode: '0755'
-    become: True
+- name: Make sure ubuntu user has access to /opt/stack
+  file:
+    path: /opt/stack
+    state: directory
+    recurse: yes
+    owner: ubuntu
+    group: ubuntu
+    mode: '0755'
+  become: True
+  tags: install-zuul
 
 - name: Install zuul venv package
   unarchive:
