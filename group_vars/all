@@ -8,7 +8,7 @@ git_server: https://opendev.org
 
 get_pip_url: https://bootstrap.pypa.io/get-pip.py
   
-pip_version: pip==19.1.1
+pip_version: pip==20.2.2
 pip_ini_content: | 
   [global]
   index-url = http://10.100.0.9:8080/cloudbase/CI/+simple/
