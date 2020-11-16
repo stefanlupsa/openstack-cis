@@ -264,6 +264,7 @@ post_stack_bash: |
     IMAGE_REF=`iniget $TEMPEST_CONFIG compute image_ref`
     iniset $TEMPEST_CONFIG compute image_ref_alt $IMAGE_REF
     iniset $TEMPEST_CONFIG validation image_ssh_user ubuntu
+    iniset $TEMPEST_CONFIG validation image_alt_ssh_user ubuntu
 
     iniset $TEMPEST_CONFIG compute build_timeout 360
     iniset $TEMPEST_CONFIG orchestration build_timeout 360
