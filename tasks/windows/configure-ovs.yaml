@@ -1,9 +1,51 @@
 ---
+    - name: Downloading OVS
+      win_get_url:
+        url: "{{ ovs_msi_url }}"
+        dest: "{{ win_dir.tmp }}\\ovs.msi"
+        timeout: 60
+      retries: 3
+      tags: configure-ovs
+
+    - name: Extract OVS certificate from msi
+      win_shell: |
+        $ErrorActionPreference = "Stop"
+        $driverFile = "{{ win_dir.tmp }}\\ovs.msi"
+        $outputFile = "{{ win_dir.tmp }}\\ovs-certificate.cer"
+        $exportType = [System.Security.Cryptography.X509Certificates.X509ContentType]::Cert
+        $cert = (Get-AuthenticodeSignature $driverFile).SignerCertificate
+        [System.IO.File]::WriteAllBytes($outputFile, $cert.Export($exportType))
+      tags: configure-ovs
+
+    - name: Install OVS certificate
+      win_shell: |
+        $ErrorActionPreference = "Stop"
+        $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2("{{ win_dir.tmp }}\\ovs-certificate.cer")
+        $rootStore = Get-Item cert:\LocalMachine\TrustedPublisher
+        $rootStore.Open("ReadWrite")
+        $rootStore.Add($cert)
+        $rootStore.Close()
+        $rootStore = Get-Item cert:\LocalMachine\Root
+        $rootStore.Open("ReadWrite")
+        $rootStore.Add($cert)
+        $rootStore.Close()
+      tags: configure-ovs
+
     - name: Install OVS
       win_package:
-        path: "{{ ovs_msi_url }}"
+        path: "{{ win_dir.tmp }}\\ovs.msi"
         productid: '{A5CE0CD6-AABF-42AB-B52D-077492FF41A6}'
         ensure: present
+      tags: configure-ovs
+
+    - name: Check if OVS extension is installed
+      win_shell: 'Get-VMSwitchExtension -VMSwitchName {{ item.name }} -Name "Cloudbase Open vSwitch Extension"'
+      register: result
+      tags: configure-ovs
+
+    - name: Enable OVS extension on {{ item.name }}
+      win_shell: 'Enable-VMSwitchExtension -VMSwitchName {{ item.name }} -Name "Cloudbase Open vSwitch Extension"'
+      when: result.rc == 0
       tags: configure-ovs
 
     - name: Expose tcp port for OVS for remote control
@@ -23,16 +65,6 @@
         name: "ovs-vswitchd"
         state: restarted
         force_dependent_services: yes
-      tags: configure-ovs
-
-    - name: Check if OVS extension is installed
-      win_shell: 'Get-VMSwitchExtension -VMSwitchName {{ item.name }} -Name "Cloudbase Open vSwitch Extension"'
-      register: result
-      tags: configure-ovs
-
-    - name: Enable OVS extension on {{ item.name }}
-      win_shell: 'Enable-VMSwitchExtension -VMSwitchName {{ item.name }} -Name "Cloudbase Open vSwitch Extension"'
-      when: result.rc == 0
       tags: configure-ovs
 
     - name: Get dataplane_informations.yaml content
