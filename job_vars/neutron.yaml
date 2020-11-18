@@ -312,11 +312,11 @@ win_cherry_picks:
   - project: openstack/neutron
     path: "{{ win_dir.build }}\\neutron"
     patches:
-      - refs/changes/21/567621/13
-  - project: openstack/compute-hyperv
-    path: "{{ win_dir.build }}\\compute-hyperv"
-    patches:
-      - refs/changes/60/702660/2
+      - refs/changes/59/763159/1
+  # - project: openstack/compute-hyperv
+    # path: "{{ win_dir.build }}\\compute-hyperv"
+    # patches:
+      # - refs/changes/60/702660/2
 
 compute_driver: compute_hyperv.driver.HyperVDriver
 
