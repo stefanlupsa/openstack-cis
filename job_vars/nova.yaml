@@ -85,6 +85,10 @@ tempest_tests:
       tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_shelve_unshelve_server
       tempest.scenario.test_stamp_pattern.TestStampPattern.test_stamp_pattern
       tempest.api.object_storage
+      # Excluding the test until a fix is available
+      # https://bugs.launchpad.net/nova/+bug/1257594
+      # https://bugs.launchpad.net/nova/+bug/1732428
+      tempest.scenario.test_shelve_instance.TestShelveInstance.test_cold_migrate_unshelved_instance
 
   isolated-tests: |
       tempest.api.compute.admin.test_servers_negative.ServersAdminNegativeTestJSON.test_resize_server_using_overlimit_ram
