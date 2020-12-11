@@ -41,9 +41,6 @@ neutron_hyperv_agent:
     template: neutron-hyperv-agent.conf
 
 win_upper_constraints_pinning:
-  - olsorootwrap:
-    project: 'oslo.rootwrap'
-    value: 'oslo.rootwrap===5.14.0'
   - yappi:
     project: 'yappi'
     value: 'yappi===1.0'
