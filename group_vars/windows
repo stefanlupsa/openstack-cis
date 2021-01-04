@@ -41,6 +41,9 @@ neutron_hyperv_agent:
     template: neutron-hyperv-agent.conf
 
 win_upper_constraints_pinning:
+  - zstd:
+    project: 'zstd'
+    value: 'zstd===1.4.5.1'
   - yappi:
     project: 'yappi'
     value: 'yappi===1.0'
