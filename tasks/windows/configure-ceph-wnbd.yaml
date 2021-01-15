@@ -1,0 +1,55 @@
+---
+    - name: Downloading Ceph WNBD
+      win_get_url:
+        url: "{{ ceph_wnbd_msi_url }}"
+        dest: "{{ win_dir.tmp }}\\ceph-wnbd.msi"
+        timeout: 60
+      retries: 3
+      tags: configure-ceph-nbd
+
+    - name: Extract Ceph WNBD certificate from msi
+      win_shell: |
+        $ErrorActionPreference = "Stop"
+        $driverFile = "{{ win_dir.tmp }}\\ceph-wnbd.msi"
+        $outputFile = "{{ win_dir.tmp }}\\ceph-wnbd-certificate.cer"
+        $exportType = [System.Security.Cryptography.X509Certificates.X509ContentType]::Cert
+        $cert = (Get-AuthenticodeSignature $driverFile).SignerCertificate
+        [System.IO.File]::WriteAllBytes($outputFile, $cert.Export($exportType))
+      tags: configure-ceph-nbd
+
+    - name: Install Ceph WNBD certificate
+      win_shell: |
+        $ErrorActionPreference = "Stop"
+        $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2("{{ win_dir.tmp }}\\ceph-wnbd-certificate.cer")
+        $rootStore = Get-Item cert:\LocalMachine\TrustedPublisher
+        $rootStore.Open("ReadWrite")
+        $rootStore.Add($cert)
+        $rootStore.Close()
+        $rootStore = Get-Item cert:\LocalMachine\Root
+        $rootStore.Open("ReadWrite")
+        $rootStore.Add($cert)
+        $rootStore.Close()
+      tags: configure-ceph-nbd
+
+    - name: Install Ceph WNBD msi
+      win_package:
+        path: "{{ win_dir.tmp }}\\ceph-wnbd.msi"
+        ensure: present
+      tags: configure-ceph-nbd
+
+    - name: Ensure that Ceph binaries are present in path
+      win_path:
+        elements: 'C:\\Program Files\\Ceph\\bin\\'
+      tags: configure-ceph-nbd
+
+    - name: Create Ceph WNBD config files
+      win_template:
+        src: "windows/ceph-wnbd.conf"
+        dest: "C:\\ProgramData\\Ceph\\ceph.conf"
+      tags: configure-ceph-nbd
+
+    - name: Check ceph-rbd service exists to verify instalation
+      win_service:
+        name: "ceph-rbd"
+        state: started
+      tags: configure-ceph-nbd
