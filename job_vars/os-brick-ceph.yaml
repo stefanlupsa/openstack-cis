@@ -1,0 +1,296 @@
+vms:
+  - devstack:
+    name: "dv-osbrick-{{ zuul_change }}-{{ zuul_patchset }}-{{ job_type }}"
+    image: bionic-09.08.2019
+    flavor: devstack
+    inventory_group: devstack
+    additional_params: 'ansible_ssh_private_key_file=/home/jenkins-slave/.ssh/id_rsa.pem ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"'
+    userdata: ""
+    tags: "dv-{{ zuul_project | basename }}-{{ zuul_change }}-{{ zuul_patchset }}-{{ job_type }}"
+  - hv2016-compute:
+    name: "hv-osbrick-{{ zuul_change }}-{{ zuul_patchset }}-{{ job_type }}"
+    image: win2016-hypervrole
+    flavor: ci-win2016hv
+    inventory_group: win2016-compute
+    additional_params: "ansible_winrm_cert_pem=/home/jenkins-slave/ssl/ssl_winrm.crt ansible_winrm_cert_key_pem=/home/jenkins-slave/ssl/ssl_winrm.key ansible_winrm_transport=certificate ansible_ssh_user=administrator ansible_connection=winrm ansible_winrm_server_cert_validation=ignore ansible_ssh_port=5986"
+    userdata: "{{ lookup('file', '/home/jenkins-slave/ssl/ssl_winrm.crt') }}"
+    tags: "hv-{{ zuul_project | basename }}-{{ zuul_change }}-{{ zuul_patchset }}-{{ job_type }}"
+
+win_crt: /home/jenkins-slave/ssl/ssl_winrm.crt
+win_key: /home/jenkins-slave/ssl/ssl_winrm.key
+log_key: /home/jenkins-slave/.ssh/id_rsa_log.pem
+log_path: /tmp/build_logs/{{ zuul_change }}-{{ zuul_patchset }}/{{ job_type }}
+
+## devstack
+
+#cherry_picks:
+#  - project: openstack/cinder
+#    path: "{{ devstack_dir.stack }}/cinder"
+#    patches:
+#      - refs/changes/41/403641/4
+#      - refs/changes/19/426719/4
+#  - project: openstack/os-win
+#    path: "{{ devstack_dir.stack }}/os-win"
+#    patches:
+#      - refs/changes/41/403641/4
+#      - refs/changes/19/426719/4
+
+local_conf:
+  enable_services:
+    - rabbit
+    - mysql
+    - key
+    - n-api
+    - n-crt
+    - n-cond
+    - n-sch
+    - n-cauth
+    - neutron
+    - q-svc
+    - q-agt
+    - q-dhcp
+    - q-l3
+    - q-meta
+    - q-metering
+    - q-vpn
+    - g-api
+    - g-reg
+    - cinder
+    - c-vol
+    - c-bak
+    - c-api
+    - c-sch
+    - s-proxy
+    - s-object
+    - s-container
+    - s-account
+    - heat
+    - h-api
+    - h-api-cfn
+    - h-api-cw
+    - h-eng
+    - ceilometer-acentral
+    - ceilometer-acompute
+    - ceilometer-collector
+    - ceilometer-api
+    - ceilometer-anotification
+    - tempest
+
+  disable_services:
+    - n-obj
+    - n-novnc
+    - n-net
+    - n-cpu
+    - q-lbaas
+    - q-fwaas
+    - horizon
+
+  ip_version: 4
+  live_migration: False
+  block_migration: True
+  tenant_vlan_range: "{{ vlan_range }}"
+  enable_tenant_vlans: false
+  enable_tenant_tunnels: true
+  q_ml2_tenant_network_type: vxlan
+  image_urls: "{{ image_urls }}"
+  append: |
+    enable_plugin devstack-plugin-ceph https://opendev.org/openstack/devstack-plugin-ceph
+    ENABLE_CEPH_CINDER=True     # ceph backend for cinder
+    ENABLE_CEPH_GLANCE=False    # store images in ceph
+    ENABLE_CEPH_C_BAK=False      # backup volumes to ceph
+    ENABLE_CEPH_NOVA=False      # allow nova to use ceph resources
+    VOLUME_BACKING_FILE_SIZE=25GB
+
+    Q_ML2_PLUGIN_MECHANISM_DRIVERS=openvswitch
+    ATTACH_ENCRYPTED_VOLUME_AVAILABLE=False
+    SWIFT_REPLICAS=1
+    SWIFT_HASH=66a3d6b56c1f479c8b4e70ab5d2014f6
+    SWIFT_START_ALL_SERVICES=False
+    USE_PYTHON3=True
+
+    [[post-config|$NOVA_CONF]]
+    [DEFAULT]
+    force_config_drive = True
+    scheduler_default_filters=RetryFilter,AvailabilityZoneFilter,RamFilter,DiskFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,ServerGroupAntiAffinityFilter,ServerGroupAffinityFilter,DifferentHostFilter,SameHostFilter
+    [glance]
+    use_glance_v1=False
+    [oslo_messaging_rabbit]
+    heartbeat_timeout_threshold = 600
+    heartbeat_rate = 3
+    [placement]
+    os_region_name = RegionOne
+    project_domain_name = Default
+    project_name = service
+    user_domain_name = Default
+    password = Passw0rd
+    username = placement
+    auth_url = http://{{ devstack_ip }}/identity
+    auth_type = password
+
+    [[post-config|$NEUTRON_CONF]]
+    [database]
+    min_pool_size = 5
+    max_pool_size = 50
+    max_overflow = 50
+    [quotas]
+    quota_network = 100
+    quota_subnet = 100
+    quota_port = 500
+    quota_security_group = 100
+    quota_security_group_rule = 100
+    quota_vip = 100
+    quota_pool = 100
+    quota_loadbalancer = 100
+    quota_router = 100
+    quota_floatingip = 50
+    quota_firewall = 10
+    quota_firewall_policy = 10
+    quota_firewall_rule = 100
+
+    [[post-config|$CINDER_CONF]]
+    [DEFAULT]
+    os_privileged_user_auth_url=http://{{ devstack_ip }}/identity/v2.0
+
+    enabled_backends = ceph
+
+    [ceph]
+    volume_driver = cinder.volume.drivers.rbd.RBDDriver
+    volume_backend_name = ceph
+    rbd_pool = volumes
+    rbd_ceph_conf = /etc/ceph/ceph.conf
+    rbd_flatten_volume_from_snapshot = false
+    rbd_max_clone_depth = 5
+    rbd_store_chunk_size = 4
+    rados_connect_timeout = -1
+
+    [[post-config|/$Q_PLUGIN_CONF_FILE]]
+    [securitygroup]
+    enable_security_group = True
+    # Note(lpetrut): For some reason, the br-int controller is
+    # unaccessible, so we'll stick with ovs-ofctl until we find
+    # out what's wrong.
+    [ovs]
+    of_interface = ovs-ofctl
+
+#localsh_append: |
+    # Workaround for the missing volume type id. TODO: remove this after it's fixed.
+    # This is also used for the wrong extra_specs format issue
+#    cinder type-create blank
+
+post_stack_bash: |
+    source {{ devstack_dir.devstack }}/functions
+    TEMPEST_CONFIG={{ devstack_dir.stack }}/tempest/etc/tempest.conf
+    iniset $TEMPEST_CONFIG compute volume_device_name "sdb"
+    iniset $TEMPEST_CONFIG compute min_compute_nodes {{ win2016_compute_nodes | length }}
+    iniset $TEMPEST_CONFIG compute flavor_ref 452
+    iniset $TEMPEST_CONFIG compute flavor_ref_alt 451
+    iniset $TEMPEST_CONFIG compute-feature-enabled rdp_console true
+    iniset $TEMPEST_CONFIG compute-feature-enabled block_migrate_cinder_iscsi False
+    iniset $TEMPEST_CONFIG compute-feature-enabled block_migration_for_live_migration False
+    iniset $TEMPEST_CONFIG compute-feature-enabled live_migration False
+    iniset $TEMPEST_CONFIG compute-feature-enabled interface_attach False
+    iniset $TEMPEST_CONFIG compute-feature-enabled swap_volume False
+
+    iniset $TEMPEST_CONFIG scenario img_dir "/home/ubuntu/devstack/files/"
+    iniset $TEMPEST_CONFIG scenario img_file "{{ local_conf.image_urls | basename }}"
+    iniset $TEMPEST_CONFIG scenario img_disk_format vhdx
+    iniset $TEMPEST_CONFIG scenario dhcp_client dhclient
+
+    IMAGE_REF=`iniget $TEMPEST_CONFIG compute image_ref`
+    iniset $TEMPEST_CONFIG compute image_ref_alt $IMAGE_REF
+    iniset $TEMPEST_CONFIG validation image_ssh_user ubuntu
+    iniset $TEMPEST_CONFIG validation image_alt_ssh_user ubuntu
+
+    iniset $TEMPEST_CONFIG compute build_timeout 360
+    iniset $TEMPEST_CONFIG orchestration build_timeout 360
+    iniset $TEMPEST_CONFIG volume build_timeout 360
+    iniset $TEMPEST_CONFIG boto build_timeout 360
+
+    iniset $TEMPEST_CONFIG compute ssh_timeout 360
+    iniset $TEMPEST_CONFIG compute allow_tenant_isolation True
+#    iniset $TEMPEST_CONFIG volume-feature-enabled manage_volume False
+
+tempest_tests:
+  included-tests: |
+      tempest.scenario.test_minimum_basic
+      tempest.scenario.test_stamp_pattern
+      tempest.scenario.test_volume_boot_pattern
+
+  excluded-tests: |
+      tempest.scenario.test_stamp_pattern.TestStampPattern.test_stamp_pattern
+
+
+
+## windows
+join_ad: False
+
+win_git_prep_projects:
+  - openstack/requirements
+  - openstack/nova
+  - openstack/neutron
+  - openstack/compute-hyperv
+  - openstack/os-win
+  - openstack/os-brick
+  - openstack/networking-hyperv
+
+services:
+  - nova:
+    name: nova-compute
+    description: OpenStack nova Compute Service
+    binary: "{{ win_dir.python }}\\scripts\\nova-compute.exe"
+    config: "{{ win_dir.etc }}\\nova.conf"
+    template: nova.conf
+
+# ceph plugin installs simplejson as apt package and will conflict with other devstack automation
+upper_constraints_pinning:
+  - simplejson:
+    project: 'simplejson'
+    value: 'simplejson===3.13.2'
+
+win_python_packages:
+  - pywin32
+  - pbr
+  - pymysql
+  - ovs
+
+win_cherry_picks:
+  - project: openstack/neutron
+    path: "{{ win_dir.build }}\\neutron"
+    patches:
+      - refs/changes/59/763159/1
+  - project: openstack/os-brick
+    path: "{{ win_dir.build }}\\os-brick"
+    patches:
+      - refs/changes/03/718403/17
+  - project: openstack/compute-hyperv
+    path: "{{ win_dir.build }}\\compute-hyperv"
+    patches:
+      - refs/changes/99/718399/5
+
+compute_driver: compute_hyperv.driver.HyperVDriver
+data_bridge_ovs: br-ethernet
+win2016_compute_node_ip: "{{ groups['win2016-compute'][0] }}"
+
+win_dir:
+  openstack: 'c:\openstack'
+  bin: 'c:\openstack\bin'
+  log: 'c:\openstack\log'
+  etc: 'c:\openstack\etc'
+  build: 'c:\openstack\build'
+  tmp: 'c:\openstack\tmp'
+  python: 'c:\python37'
+  python_zuul: 'c:\python27'
+  pip: 'C:\ProgramData\pip'
+  instances: 'C:\openstack\instances'
+  event_log: 'c:\openstack\log\event-log'
+
+win_python_archive_url: http://10.100.0.9/ci/python37.zip
+
+vmswitches:
+  - name: "{{ data_bridge }}"
+    subnet: "{{ data_network }}"
+    management: False
+
+volume_driver: cinder.volume.drivers.rbd.RBDDriver
+
+ceph_wnbd_msi_url: http://10.107.8.204/ceph_v16_0_0_beta.msi
