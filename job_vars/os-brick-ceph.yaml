@@ -51,29 +51,12 @@ local_conf:
     - q-dhcp
     - q-l3
     - q-meta
-    - q-metering
-    - q-vpn
     - g-api
     - g-reg
     - cinder
     - c-vol
-    - c-bak
     - c-api
     - c-sch
-    - s-proxy
-    - s-object
-    - s-container
-    - s-account
-    - heat
-    - h-api
-    - h-api-cfn
-    - h-api-cw
-    - h-eng
-    - ceilometer-acentral
-    - ceilometer-acompute
-    - ceilometer-collector
-    - ceilometer-api
-    - ceilometer-anotification
     - tempest
 
   disable_services:
@@ -84,6 +67,23 @@ local_conf:
     - q-lbaas
     - q-fwaas
     - horizon
+    - c-bak
+    - ceilometer-acentral
+    - ceilometer-acompute
+    - ceilometer-collector
+    - ceilometer-api
+    - ceilometer-anotification
+    - heat
+    - h-api
+    - h-api-cfn
+    - h-api-cw
+    - h-eng
+    - q-metering
+    - q-vpn
+    - s-proxy
+    - s-object
+    - s-container
+    - s-account
 
   ip_version: 4
   live_migration: False
