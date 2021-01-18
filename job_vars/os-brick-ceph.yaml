@@ -293,4 +293,4 @@ vmswitches:
 
 volume_driver: cinder.volume.drivers.rbd.RBDDriver
 
-ceph_wnbd_msi_url: http://10.107.8.204/ceph_v16_0_0_beta.msi
+ceph_wnbd_msi_url: http://10.100.0.9/ci/ceph_v16_0_0_beta.msi
