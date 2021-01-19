@@ -22,6 +22,12 @@ log_key: /home/jenkins-slave/.ssh/id_rsa_log.pem
 log_path: /tmp/build_logs/{{ zuul_change }}-{{ zuul_patchset }}/{{ job_type }}
 
 ## devstack
+# ceph plugin installs simplejson as apt package and will conflict with other devstack automation
+upper_constraints_pinning:
+  - simplejson:
+    project: 'simplejson'
+    value: 'simplejson===3.13.2'
+
 local_conf:
   enable_services:
     - rabbit
@@ -227,12 +233,6 @@ services:
     binary: "{{ win_dir.python }}\\scripts\\nova-compute.exe"
     config: "{{ win_dir.etc }}\\nova.conf"
     template: nova.conf
-
-# ceph plugin installs simplejson as apt package and will conflict with other devstack automation
-upper_constraints_pinning:
-  - simplejson:
-    project: 'simplejson'
-    value: 'simplejson===3.13.2'
 
 win_python_packages:
   - pywin32
