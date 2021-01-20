@@ -66,6 +66,17 @@
       failed_when: False
       tags: start-services
 
+- hosts: devstack
+  vars_files:
+    - zuul-params.yaml
+
+  tasks:
+    - name: Get Ceph Cinder Keyring file for Ceph WNBD
+      fetch:
+        src: "/etc/ceph/ceph.client.cinder.keyring"
+        dest: "{{ work_dir }}/ceph.keyring"
+        flat: yes
+      when: job_type == "ceph" and job_type is defined
 
 - hosts: win2016-compute
   vars_files:
@@ -89,6 +100,18 @@
 
     - include: tasks/windows/configure-smbshare.yaml
       when: smbshare is defined
+
+    - name: Copy Ceph Cinder Keyring file for Ceph WNBD
+      win_copy:
+        dest: "C:\\ProgramData\\ceph\\keyring"
+        src: "{{ work_dir }}/ceph.keyring"
+      when: job_type == "ceph" and job_type is defined
+
+    - name: Check Ceph WNBD connection Cinder Ceph cluster.
+      win_command: rbd ls --id cinder --pool volumes
+      register: check_ceph_wnbd
+      failed_when: "check_ceph_wnbd.rc != 0"
+      when: job_type == "ceph" and job_type is defined
 
     - include: tasks/windows/enable-live-migration.yaml
       when: join_ad is defined and join_ad

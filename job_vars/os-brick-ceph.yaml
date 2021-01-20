@@ -1,14 +1,14 @@
 vms:
-  - devstack: 
-    name: "dv-cinder-{{ zuul_change }}-{{ zuul_patchset }}-{{ job_type }}"
+  - devstack:
+    name: "dv-osbrick-{{ zuul_change }}-{{ zuul_patchset }}-{{ job_type }}"
     image: bionic-09.08.2019
     flavor: devstack
     inventory_group: devstack
     additional_params: 'ansible_ssh_private_key_file=/home/jenkins-slave/.ssh/id_rsa.pem ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"'
     userdata: ""
     tags: "dv-{{ zuul_project | basename }}-{{ zuul_change }}-{{ zuul_patchset }}-{{ job_type }}"
-  - hv2016-compute: 
-    name: "hv-cinder-{{ zuul_change }}-{{ zuul_patchset }}-{{ job_type }}"
+  - hv2016-compute:
+    name: "hv-osbrick-{{ zuul_change }}-{{ zuul_patchset }}-{{ job_type }}"
     image: win2016-hypervrole
     flavor: ci-win2016hv
     inventory_group: win2016-compute
@@ -22,17 +22,11 @@ log_key: /home/jenkins-slave/.ssh/id_rsa_log.pem
 log_path: /tmp/build_logs/{{ zuul_change }}-{{ zuul_patchset }}/{{ job_type }}
 
 ## devstack
-git_prep_projects:
-  - openstack/keystone
-  - openstack/glance
-  - openstack/cinder  
-  - openstack/requirements
-  - openstack/nova
-  - openstack/neutron
-  - openstack/networking-hyperv
-  - openstack/swift
-  - openstack/tempest
-  - openstack/cinder-tempest-plugin
+# ceph plugin installs simplejson as apt package and will conflict with other devstack automation
+upper_constraints_pinning:
+  - simplejson:
+    project: 'simplejson'
+    value: 'simplejson===3.13.2'
 
 local_conf:
   enable_services:
@@ -50,32 +44,15 @@ local_conf:
     - q-dhcp
     - q-l3
     - q-meta
-    - q-metering
-    - q-vpn
     - g-api
     - g-reg
     - cinder
+    - c-vol
     - c-api
     - c-sch
-    - s-proxy
-    - s-object
-    - s-container
-    - s-account
-    - heat
-    - h-api
-    - h-api-cfn
-    - h-api-cw
-    - h-eng
-    - ceilometer-acentral
-    - ceilometer-acompute
-    - ceilometer-collector
-    - ceilometer-api
-    - ceilometer-anotification
     - tempest
 
   disable_services:
-    - c-bak
-    - c-vol
     - n-obj
     - n-novnc
     - n-net
@@ -83,6 +60,23 @@ local_conf:
     - q-lbaas
     - q-fwaas
     - horizon
+    - c-bak
+    - ceilometer-acentral
+    - ceilometer-acompute
+    - ceilometer-collector
+    - ceilometer-api
+    - ceilometer-anotification
+    - heat
+    - h-api
+    - h-api-cfn
+    - h-api-cw
+    - h-eng
+    - q-metering
+    - q-vpn
+    - s-proxy
+    - s-object
+    - s-container
+    - s-account
 
   ip_version: 4
   live_migration: False
@@ -93,9 +87,14 @@ local_conf:
   q_ml2_tenant_network_type: vxlan
   image_urls: "{{ image_urls }}"
   append: |
+    enable_plugin devstack-plugin-ceph https://opendev.org/openstack/devstack-plugin-ceph
+    ENABLE_CEPH_CINDER=True     # ceph backend for cinder
+    ENABLE_CEPH_GLANCE=False    # store images in ceph
+    ENABLE_CEPH_C_BAK=False      # backup volumes to ceph
+    ENABLE_CEPH_NOVA=False      # allow nova to use ceph resources
+    VOLUME_BACKING_FILE_SIZE=25GB
+
     Q_ML2_PLUGIN_MECHANISM_DRIVERS=openvswitch
-    TEMPEST_PLUGINS=/opt/stack/cinder-tempest-plugin
-    LIBS_FROM_GIT=cinder-tempest-plugin
     ATTACH_ENCRYPTED_VOLUME_AVAILABLE=False
     SWIFT_REPLICAS=1
     SWIFT_HASH=66a3d6b56c1f479c8b4e70ab5d2014f6
@@ -110,7 +109,7 @@ local_conf:
     use_glance_v1=False
     [oslo_messaging_rabbit]
     heartbeat_timeout_threshold = 600
-    heartbeat_rate = 3 
+    heartbeat_rate = 3
     [placement]
     os_region_name = RegionOne
     project_domain_name = Default
@@ -120,7 +119,7 @@ local_conf:
     username = placement
     auth_url = http://{{ devstack_ip }}/identity
     auth_type = password
-    
+
     [[post-config|$NEUTRON_CONF]]
     [database]
     min_pool_size = 5
@@ -140,11 +139,23 @@ local_conf:
     quota_firewall = 10
     quota_firewall_policy = 10
     quota_firewall_rule = 100
-    
+
     [[post-config|$CINDER_CONF]]
     [DEFAULT]
     os_privileged_user_auth_url=http://{{ devstack_ip }}/identity/v2.0
- 
+
+    enabled_backends = ceph
+
+    [ceph]
+    volume_driver = cinder.volume.drivers.rbd.RBDDriver
+    volume_backend_name = ceph
+    rbd_pool = volumes
+    rbd_ceph_conf = /etc/ceph/ceph.conf
+    rbd_flatten_volume_from_snapshot = false
+    rbd_max_clone_depth = 5
+    rbd_store_chunk_size = 4
+    rados_connect_timeout = -1
+
     [[post-config|/$Q_PLUGIN_CONF_FILE]]
     [securitygroup]
     enable_security_group = True
@@ -186,8 +197,6 @@ post_stack_bash: |
     iniset $TEMPEST_CONFIG compute build_timeout 360
     iniset $TEMPEST_CONFIG orchestration build_timeout 360
     iniset $TEMPEST_CONFIG volume build_timeout 360
-    iniset $TEMPEST_CONFIG volume manage_volume_ref "source-name, //127.0.0.1/smbshare/volume-%s.vhdx"
-    iniset $TEMPEST_CONFIG volume storage_protocol smbfs
     iniset $TEMPEST_CONFIG boto build_timeout 360
 
     iniset $TEMPEST_CONFIG compute ssh_timeout 360
@@ -196,40 +205,54 @@ post_stack_bash: |
 
 tempest_tests:
   included-tests: |
-      tempest.api.volume
-      tempest.api.orchestration.stacks.test_volumes
-      tempest.api.compute.volumes
-      tempest.api.compute.admin.test_live_migration.LiveBlockMigrationTestJSON.test_iscsi_volume
-      tempest.api.compute.admin.test_live_migration.LiveBlockMigrationTestJSON.test_volume_backed_live_migration
-      tempest.api.compute.servers.test_delete_server.DeleteServersTestJSON.test_delete_server_while_in_attached_volume
-      tempest.api.compute.servers.test_server_rescue_negative.ServerRescueNegativeTestJSON.test_rescued_vm_attach_volume
-      tempest.api.compute.servers.test_server_rescue_negative.ServerRescueNegativeTestJSON.test_rescued_vm_detach_volume
-      tempest.scenario.test_encrypted_cinder_volumes
-      tempest.scenario.test_minimum_basic.TestMinimumBasicScenario.test_minimum_basic_scenario
-      tempest.scenario.test_shelve_instance.TestShelveInstance.test_shelve_volume_backed_instance
-      tempest.scenario.test_stamp_pattern.TestStampPattern.test_stamp_pattern
-      tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern.test_create_ebs_image_and_check_boot
-      tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern.test_volume_boot_pattern
-      tempest.scenario.test_volume_boot_pattern.TestVolumeBootPatternV2.test_create_ebs_image_and_check_boot
-      tempest.scenario.test_volume_boot_pattern.TestVolumeBootPatternV2.test_volume_boot_pattern
-      tempest.thirdparty.boto.test_ec2_instance_run.InstanceRunTest.test_compute_with_volumes
-      tempest.thirdparty.boto.test_ec2_volumes
-      cinder_tempest_plugin
+      tempest.scenario.test_minimum_basic
+      tempest.scenario.test_stamp_pattern
+      tempest.scenario.test_volume_boot_pattern
 
   excluded-tests: |
-      tempest.api.volume.admin.test_snapshot_manage
-      # volume extend is not supported when having snapshots
-      tempest.api.volume.test_volumes_extend.VolumesExtendTest.test_volume_extend_when_volume_has_snapshot
-      # https://bugs.launchpad.net/tempest/+bug/1691144
-      tempest.api.volume.admin.test_volume_hosts.VolumeHostsAdminTestsJSON.test_show_host
-      # exclude requested by luci, sometimes it fails reading from a diff image while the volume is attached
-      tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern
-      tempest.api.volume.test_volumes_extend.VolumesExtendAttachedTest.test_extend_attached_volume
       tempest.scenario.test_stamp_pattern.TestStampPattern.test_stamp_pattern
+
 
 
 ## windows
 join_ad: False
+
+win_git_prep_projects:
+  - openstack/requirements
+  - openstack/nova
+  - openstack/neutron
+  - openstack/compute-hyperv
+  - openstack/os-win
+  - openstack/os-brick
+  - openstack/networking-hyperv
+
+services:
+  - nova:
+    name: nova-compute
+    description: OpenStack nova Compute Service
+    binary: "{{ win_dir.python }}\\scripts\\nova-compute.exe"
+    config: "{{ win_dir.etc }}\\nova.conf"
+    template: nova.conf
+
+win_python_packages:
+  - pywin32
+  - pbr
+  - pymysql
+  - ovs
+
+win_cherry_picks:
+  - project: openstack/os-brick
+    path: "{{ win_dir.build }}\\os-brick"
+    patches:
+      - refs/changes/03/718403/17
+  - project: openstack/compute-hyperv
+    path: "{{ win_dir.build }}\\compute-hyperv"
+    patches:
+      - refs/changes/99/718399/5
+
+compute_driver: compute_hyperv.driver.HyperVDriver
+data_bridge_ovs: br-ethernet
+win2016_compute_node_ip: "{{ groups['win2016-compute'][0] }}"
 
 win_dir:
   openstack: 'c:\openstack'
@@ -246,51 +269,11 @@ win_dir:
 
 win_python_archive_url: http://10.100.0.9/ci/python37.zip
 
-win_git_prep_projects:
-  - openstack/requirements
-  - openstack/cinder
-  - openstack/nova
-  - openstack/neutron
-  - openstack/compute-hyperv
-  - openstack/os-win
-  - openstack/networking-hyperv
-
-services:
-  - nova:
-    name: nova-compute
-    description: OpenStack nova Compute Service
-    binary: "{{ win_dir.python }}\\scripts\\nova-compute.exe"
-    config: "{{ win_dir.etc }}\\nova.conf"
-    template: nova.conf
-
-  - cinder-volume:
-    name: cinder-volume
-    description: OpenStack Cinder Volume Service
-    binary: "{{ win_dir.python }}\\scripts\\cinder-volume.exe"
-    config: "{{ win_dir.etc }}\\cinder-volume.conf"
-    template: cinder-volume.conf
-
-  - cinder-backup:
-    name: cinder-backup
-    description: OpenStack Cinder Backup Service
-    binary: "{{ win_dir.python }}\\scripts\\cinder-backup.exe"
-    config: "{{ win_dir.etc }}\\cinder-backup.conf"
-    template: cinder-backup.conf
-
-win_python_packages:
-  - pywin32
-  - pbr
-  - pymysql
-  - ovs
-
-compute_driver: compute_hyperv.driver.HyperVDriver
-data_bridge_ovs: br-ethernet
-win2016_compute_node_ip: "{{ groups['win2016-compute'][0] }}"
-
 vmswitches:
   - name: "{{ data_bridge }}"
     subnet: "{{ data_network }}"
     management: False
 
-volume_driver: cinder.volume.drivers.windows.smbfs.WindowsSmbfsDriver
-smbshare: 'c:\smbshare'
+volume_driver: cinder.volume.drivers.rbd.RBDDriver
+
+ceph_wnbd_msi_url: http://10.100.0.9/ci/ceph_v16_0_0_beta.msi
