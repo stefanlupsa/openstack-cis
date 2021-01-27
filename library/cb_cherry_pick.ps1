@@ -24,46 +24,49 @@ If ($ref -isnot [Array]) {
     Fail-Json $result "ref must be a string or list of ref strings"
 }
 
-Function Execute-Command ($commandTitle, $commandPath, $commandArguments)
+Function Execute-Command ($commandTitle, $commandPath, $commandArguments, $try_count = 1)
 {
-  Try {
-    $pinfo = New-Object System.Diagnostics.ProcessStartInfo
-    $pinfo.FileName = $commandPath
-    $pinfo.RedirectStandardError = $true
-    $pinfo.RedirectStandardOutput = $true
-    $pinfo.UseShellExecute = $false
-    $pinfo.Arguments = $commandArguments
-    $p = New-Object System.Diagnostics.Process
-    $p.StartInfo = $pinfo
-    $p.Start() | out-null
-    $r = [pscustomobject]@{   
-        command = $commandPath + " " + $commandArguments
-        stdout = $p.StandardOutput.ReadToEnd()
-        stderr = $p.StandardError.ReadToEnd()
-        exitcode = $p.ExitCode  
-    }
-    $p.WaitForExit()
-    return $r
-  }
-  Catch {
-    return $r = [pscustomobject]@{
-        command = $commandPath + " " + $commandArguments
-        stderr = $_
-        exitcode = 1
-    }    
-  }
+    do {
+        Try {
+            $pinfo = New-Object System.Diagnostics.ProcessStartInfo
+            $pinfo.FileName = $commandPath
+            $pinfo.RedirectStandardError = $true
+            $pinfo.RedirectStandardOutput = $true
+            $pinfo.UseShellExecute = $false
+            $pinfo.Arguments = $commandArguments
+            $p = New-Object System.Diagnostics.Process
+            $p.StartInfo = $pinfo
+            $p.Start() | out-null
+            $ret_val = [pscustomobject]@{
+                command = $commandPath + " " + $commandArguments
+                stdout = $p.StandardOutput.ReadToEnd()
+                stderr = $p.StandardError.ReadToEnd()
+                exitcode = $p.ExitCode
+            }
+            $p.WaitForExit()
+        }
+        Catch {
+            $ret_val = [pscustomobject]@{
+                command = $commandPath + " " + $commandArguments
+                stderr = $_
+                exitcode = 1
+            }
+        }
+        $try_count--
+    } while ($try_count -gt 0 -and $ret_val.exitcode -ne 0)
+    return $ret_val
 }
 
 $result.output = @{}
 
-If (-not $check_mode) { 
+If (-not $check_mode) {
     if (!(Test-Path $path)) {
         Fail-Json $result "Path $path does not exist"
     } else {
         Execute-Command -commandTitle "git set global email" -commandPath "git" -commandArguments "config --global user.email cbci@cloudbasesolutions.com"
         Execute-Command -commandTitle "git set global user" -commandPath "git" -commandArguments "config --global user.name CBCI"
         foreach ($r in $ref) {
-            $fetch_result = Execute-Command -commandTitle "git fetch" -commandPath "git" -commandArguments "-C $path fetch $git_url $r"
+            $fetch_result = Execute-Command -commandTitle "git fetch" -commandPath "git" -commandArguments "-C $path fetch $git_url $r" -try_count 3
             $result.output[$r] = @{}
             $result.output[$r].Add("git fetch", $fetch_result)
             if (($fetch_result.exitcode) -eq 0) {
