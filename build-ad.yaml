@@ -6,6 +6,17 @@
 
   tasks:
 
+  - name: Include variables from job_vars/{{ zuul_project | basename }}.yaml
+    include_vars: "job_vars/{{ zuul_project | basename }}.yaml"
+    failed_when: False
+    tags: always
+
+  - name: Include variables from job_vars/{{ zuul_project | basename }}-{{ job_type }}.yaml
+    include_vars: "job_vars/{{ zuul_project | basename }}-{{ job_type }}.yaml"
+    when: job_type is defined
+    failed_when: False
+    tags: always
+
   - name: Disable firewall for Domain, Public and Private profiles
     win_firewall:
       state: disabled
