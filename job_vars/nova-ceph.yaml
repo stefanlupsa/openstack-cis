@@ -177,6 +177,7 @@ local_conf:
     of_interface = ovs-ofctl
 
 ## windows
+ad_domain: "nc-{{ zuul_change }}-{{ zuul_patchset }}.local"
 
 ### MUST ENSURE THAT openstack/requirements PROJECT IS ALWAYS ON THE FIRST POSITION in git_prep_projects VARIABLE
 win_git_prep_projects:
