@@ -4,14 +4,18 @@ set -e
 echo "Before updating nova flavors:"
 openstack flavor list
 
+nova flavor-delete 1 || echo "Flavor 1 not found"
 nova flavor-delete 42 || echo "Flavor 42 not found"
 nova flavor-delete 84 || echo "Flavor 84 not found"
 nova flavor-delete 451 || echo "Flavor 451 not found"
+nova flavor-delete 452 || echo "Flavor 452 not found"
 
-nova flavor-create m1.nano 42 256 1 1
-nova flavor-create m1.micro 84 256 2 1
-nova flavor-create m1.heat 451 512 1 1
-nova flavor-create m1.heat2 452 1024 1 1
+
+nova flavor-create m1.tiny 1 521 2 1
+nova flavor-create m1.nano 42 256 2 1
+nova flavor-create m1.micro 84 256 3 1
+nova flavor-create m1.heat 451 512 2 1
+nova flavor-create m1.heat2 452 1024 2 1
 
 echo "After updating nova flavors:"
 nova flavor-list
