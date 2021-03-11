@@ -8,7 +8,7 @@
 
   tasks:
     - name: Remove VLAN range for this build
-      shell: "./{{ vlan_range_tool | basename}} -f {{ vlan_range }}"
+      shell: "./{{ vlan_range_tool | basename}} -f -i {{ vlan_range }}"
       args:
         chdir: "{{ vlan_range_tool | dirname}}"
       register: vlan_range
