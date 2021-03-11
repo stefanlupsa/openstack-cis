@@ -38,6 +38,19 @@
         marker: "# {mark} {{ item.name }}"
       with_items: "{{ vms }}"
 
+    - name: Update VLAN range with instance uuid
+      shell: "./{{ vlan_range_tool | basename }} -i {{ vlan_range }} -u {{ devstack_uuid }}"
+      vars:
+        vlan_range_tool: /home/jenkins-slave/vlan_ranges/vlan_range_tool.py
+        devstack_uuid: "{{ vm_data[vms | selectattr('devstack', 'defined') | map(attribute='name') | first].server.id }}"
+      args:
+        chdir: "{{ vlan_range_tool | dirname }}"
+      register: update_vlan_range
+      until: update_vlan_range.rc == 0
+      retries: 3
+      delay: 5
+      ignore_errors: yes
+
     - file: state=absent path="{{ log_path }}"
     - file: state=directory path="{{ log_path }}"
     - file: state=directory path="{{ log_path }}/ara-report"
