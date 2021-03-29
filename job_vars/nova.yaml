@@ -268,6 +268,7 @@ post_stack_bash: |
     iniset $TEMPEST_CONFIG compute-feature-enabled rdp_console true
     iniset $TEMPEST_CONFIG compute-feature-enabled block_migrate_cinder_iscsi True
     iniset $TEMPEST_CONFIG compute-feature-enabled block_migration_for_live_migration True
+    iniset $TEMPEST_CONFIG compute-feature-enabled volume_backed_live_migration True
     iniset $TEMPEST_CONFIG compute-feature-enabled live_migration True
     iniset $TEMPEST_CONFIG compute-feature-enabled interface_attach False
     iniset $TEMPEST_CONFIG compute-feature-enabled stable_rescue False
