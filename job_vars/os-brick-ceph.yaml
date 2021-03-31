@@ -184,8 +184,7 @@ post_stack_bash: |
     iniset $TEMPEST_CONFIG compute-feature-enabled interface_attach False
     iniset $TEMPEST_CONFIG compute-feature-enabled swap_volume False
 
-    iniset $TEMPEST_CONFIG scenario img_dir "/home/ubuntu/devstack/files/"
-    iniset $TEMPEST_CONFIG scenario img_file "{{ local_conf.image_urls | basename }}"
+    iniset $TEMPEST_CONFIG scenario img_file "/home/ubuntu/devstack/files/{{ local_conf.image_urls | basename }}"
     iniset $TEMPEST_CONFIG scenario img_disk_format vhdx
     iniset $TEMPEST_CONFIG scenario dhcp_client dhclient
 

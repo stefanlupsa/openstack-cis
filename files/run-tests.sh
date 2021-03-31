@@ -65,7 +65,8 @@ else
 fi
 
 
-pushd /opt/stack/tempest
+pushd "$TEMPEST_FOLDER"
+source "$TEMPEST_FOLDER/.tox/venv/bin/activate"
 
 if [ ! -d ".stestr" ]; then
     echo "Initializing stestr"
@@ -109,6 +110,7 @@ subunit2html $TEMPEST_LOGS_FOLDER/subunit.output $TEMPEST_LOGS_FOLDER/subunit.ht
 subunit-stats $TEMPEST_LOGS_FOLDER/subunit.output > $TEMPEST_LOGS_FOLDER/subunit.stats
 exit_code=$?
 
+deactivate
 popd
 
 echo "Exit code: $exit_code"
