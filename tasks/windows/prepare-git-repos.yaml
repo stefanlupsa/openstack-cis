@@ -28,6 +28,9 @@
     win_shell: "{{ zuul_cloner_command }}"
     register: zuul_cloner_out
     failed_when: False
+    until: zuul_cloner_out.rc == 0
+    retries: 5
+    delay: 10
     tags: prepare-git-repos
 
   - name: Write zuul-cloner log file

@@ -44,4 +44,7 @@
     shell: "{{ zuul_cloner_command }}"
     register: zuul_cloner_out
     become: True
+    until: zuul_cloner_out.rc == 0
+    retries: 5
+    delay: 10
     tags: prepare-git-repos
