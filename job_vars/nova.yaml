@@ -35,7 +35,7 @@ vms:
 win_crt: /home/jenkins-slave/ssl/ssl_winrm.crt
 win_key: /home/jenkins-slave/ssl/ssl_winrm.key
 log_key: /home/jenkins-slave/.ssh/id_rsa_log.pem
-log_path: /tmp/build_logs/{{ zuul_change }}-{{ zuul_patchset }}
+log_path: /tmp/build_logs/{{ zuul_change }}-{{ zuul_patchset }}/{{ job_type }}
 
 ## devstack
 cherry_picks:
@@ -263,6 +263,7 @@ post_stack_bash: |
     iniset $TEMPEST_CONFIG compute-feature-enabled rdp_console true
     iniset $TEMPEST_CONFIG compute-feature-enabled block_migrate_cinder_iscsi True
     iniset $TEMPEST_CONFIG compute-feature-enabled block_migration_for_live_migration True
+    iniset $TEMPEST_CONFIG compute-feature-enabled volume_backed_live_migration True
     iniset $TEMPEST_CONFIG compute-feature-enabled live_migration True
     iniset $TEMPEST_CONFIG compute-feature-enabled interface_attach False
     iniset $TEMPEST_CONFIG compute-feature-enabled stable_rescue False
