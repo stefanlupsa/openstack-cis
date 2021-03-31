@@ -91,10 +91,6 @@ local_conf:
   ip_version: 4
   live_migration: True
   block_migration: True
-  tenant_vlan_range: "{{ vlan_range }}"
-  enable_tenant_vlans: false
-  enable_tenant_tunnels: true
-  q_ml2_tenant_network_type: vxlan
   image_urls: "{{ image_urls }}"
 
   append: |
@@ -105,7 +101,6 @@ local_conf:
     ENABLE_CEPH_NOVA=False      # allow nova to use ceph resources
     VOLUME_BACKING_FILE_SIZE=25GB
 
-    Q_ML2_PLUGIN_MECHANISM_DRIVERS=openvswitch
     ATTACH_ENCRYPTED_VOLUME_AVAILABLE=False
     SWIFT_REPLICAS=1
     SWIFT_HASH=66a3d6b56c1f479c8b4e70ab5d2014f6
