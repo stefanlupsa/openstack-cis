@@ -250,7 +250,7 @@ win_cherry_picks:
   - project: openstack/neutron
     path: "{{ win_dir.build }}\\neutron"
     patches:
-      - refs/changes/21/567621/13
+      - refs/changes/59/763159/1
 #  - project: openstack/cinder
 #    path: "{{ win_dir.build }}\\cinder"
 #    patches:

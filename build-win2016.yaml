@@ -102,6 +102,10 @@
     - include: tasks/windows/configure-ovs.yaml
       with_items: "{{ vmswitches }}"
       when: network_type == "ovs"
+
+    - name: Configuring Ceph WNBD
+      include: tasks/windows/configure-ceph-wnbd.yaml
+      when: job_type == "ceph" and job_type is defined
     
     - name: Update setuptools
       win_shell: "pip install -c {{ win_dir.build }}\\requirements\\upper-constraints.txt -U setuptools"

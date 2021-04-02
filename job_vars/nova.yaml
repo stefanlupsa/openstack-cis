@@ -35,14 +35,13 @@ vms:
 win_crt: /home/jenkins-slave/ssl/ssl_winrm.crt
 win_key: /home/jenkins-slave/ssl/ssl_winrm.key
 log_key: /home/jenkins-slave/.ssh/id_rsa_log.pem
-log_path: /tmp/build_logs/{{ zuul_change }}-{{ zuul_patchset }}
+log_path: /tmp/build_logs/{{ zuul_change }}-{{ zuul_patchset }}/{{ job_type }}
 
 ## devstack
 cherry_picks:
   - project: openstack/tempest
     path: "{{ devstack_dir.stack }}/tempest"
     patches:
-      - refs/changes/28/384528/13
       - refs/changes/13/433213/3
 
 neutron_agent_search_string: "Open vSwitch.*n-h.*:-)"
@@ -84,6 +83,11 @@ tempest_tests:
       tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_resize_volume_backed_server_confirm
       tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_shelve_unshelve_server
       tempest.scenario.test_stamp_pattern.TestStampPattern.test_stamp_pattern
+      tempest.api.object_storage
+      # Excluding the test until a fix is available
+      # https://bugs.launchpad.net/nova/+bug/1257594
+      # https://bugs.launchpad.net/nova/+bug/1732428
+      tempest.scenario.test_shelve_instance.TestShelveInstance.test_cold_migrate_unshelved_instance
 
   isolated-tests: |
       tempest.api.compute.admin.test_servers_negative.ServersAdminNegativeTestJSON.test_resize_server_using_overlimit_ram
@@ -180,14 +184,9 @@ local_conf:
   ip_version: 4
   live_migration: True
   block_migration: True
-  tenant_vlan_range: "{{ vlan_range }}"
-  enable_tenant_vlans: false
-  enable_tenant_tunnels: true
-  q_ml2_tenant_network_type: vxlan
   image_urls: "{{ image_urls }}"
 
   append: |
-    Q_ML2_PLUGIN_MECHANISM_DRIVERS=openvswitch
     SWIFT_REPLICAS=1
     SWIFT_HASH=66a3d6b56c1f479c8b4e70ab5d2014f6
     SWIFT_START_ALL_SERVICES=False
@@ -264,18 +263,19 @@ post_stack_bash: |
     iniset $TEMPEST_CONFIG compute-feature-enabled rdp_console true
     iniset $TEMPEST_CONFIG compute-feature-enabled block_migrate_cinder_iscsi True
     iniset $TEMPEST_CONFIG compute-feature-enabled block_migration_for_live_migration True
+    iniset $TEMPEST_CONFIG compute-feature-enabled volume_backed_live_migration True
     iniset $TEMPEST_CONFIG compute-feature-enabled live_migration True
     iniset $TEMPEST_CONFIG compute-feature-enabled interface_attach False
     iniset $TEMPEST_CONFIG compute-feature-enabled stable_rescue False
     
-    iniset $TEMPEST_CONFIG scenario img_dir "/home/ubuntu/devstack/files/"
-    iniset $TEMPEST_CONFIG scenario img_file "{{ local_conf.image_urls | basename }}"
+    iniset $TEMPEST_CONFIG scenario img_file "/home/ubuntu/devstack/files/{{ local_conf.image_urls | basename }}"
     iniset $TEMPEST_CONFIG scenario img_disk_format vhdx
     iniset $TEMPEST_CONFIG scenario dhcp_client dhclient
 
     IMAGE_REF=`iniget $TEMPEST_CONFIG compute image_ref`
     iniset $TEMPEST_CONFIG compute image_ref_alt $IMAGE_REF
     iniset $TEMPEST_CONFIG validation image_ssh_user ubuntu
+    iniset $TEMPEST_CONFIG validation image_alt_ssh_user ubuntu
 
     iniset $TEMPEST_CONFIG compute build_timeout 360
     iniset $TEMPEST_CONFIG orchestration build_timeout 360
@@ -312,26 +312,6 @@ services:
     config: "{{ win_dir.etc }}\\nova.conf"
     template: nova.conf
 
-#cherry_picks:
-#  - project: openstack/cinder
-#    path: "{{ win_dir.build }}\\cinder"
-#    patches:
-#      - refs/changes/41/403641/4
-#      - refs/changes/19/426719/4
-#  - project: openstack/os-win
-#    path: "{{ win_dir.build }}\\os-win"
-#    patches:
-#      - refs/changes/41/403641/4
-#      - refs/changes/19/426719/4
-
-
-## commented cherry pick used only for master branch
-win_cherry_picks:
-  - project: openstack/neutron
-    path: "{{ win_dir.build }}\\neutron"
-    patches:
-      - refs/changes/21/567621/13
-
 compute_driver: hyperv.driver.HyperVDriver
 
 vmswitches:
@@ -361,5 +341,5 @@ win_dir:
 win_python_archive_url: http://10.100.0.9/ci/python37.zip
 
 data_bridge_ovs: br-ethernet
-ovs_msi_url: http://10.100.0.9/ci/openvswitch-hyperv-2.7.0-certified.msi
+ovs_msi_url: http://10.100.0.9/ci/openvswitch-hyperv-installer-beta-2.12.msi
 win2016_compute_node_ip: "{{ groups['win2016-compute'][0] }}"

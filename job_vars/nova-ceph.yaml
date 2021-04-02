@@ -1,0 +1,198 @@
+vms:
+  - devstack:
+    name: "ncdv-{{ zuul_change }}-{{ zuul_patchset }}"
+    image: bionic-09.08.2019
+    flavor: devstack
+    inventory_group: devstack
+    additional_params: 'ansible_ssh_private_key_file=/home/jenkins-slave/.ssh/id_rsa.pem ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"'
+    userdata: ""
+    tags: "dv-{{ zuul_project | basename }}-{{ zuul_change }}-{{ zuul_patchset }}-{{ job_type }}"
+  - hv2016-compute:
+    name: "nch1-{{ zuul_change }}-{{ zuul_patchset }}"
+    image: win2016-hypervrole
+    flavor: ci-win2016hv
+    inventory_group: win2016-compute
+    additional_params: "ansible_winrm_cert_pem=/home/jenkins-slave/ssl/ssl_winrm.crt ansible_winrm_cert_key_pem=/home/jenkins-slave/ssl/ssl_winrm.key ansible_winrm_transport=certificate ansible_ssh_user=administrator ansible_connection=winrm ansible_winrm_server_cert_validation=ignore ansible_ssh_port=5986"
+    userdata: "{{ lookup('file', '/home/jenkins-slave/ssl/ssl_winrm.crt') }}"
+    tags: "hv1-{{ zuul_project | basename }}-{{ zuul_change }}-{{ zuul_patchset }}-{{ job_type }}"
+  - hv2016-compute:
+    name: "nch2-{{ zuul_change }}-{{ zuul_patchset }}"
+    image: win2016-hypervrole
+    flavor: ci-win2016hv
+    inventory_group: win2016-compute
+    additional_params: "ansible_winrm_cert_pem=/home/jenkins-slave/ssl/ssl_winrm.crt ansible_winrm_cert_key_pem=/home/jenkins-slave/ssl/ssl_winrm.key ansible_winrm_transport=certificate ansible_ssh_user=administrator ansible_connection=winrm ansible_winrm_server_cert_validation=ignore ansible_ssh_port=5986"
+    userdata: "{{ lookup('file', '/home/jenkins-slave/ssl/ssl_winrm.crt') }}"
+    tags: "hv2-{{ zuul_project | basename }}-{{ zuul_change }}-{{ zuul_patchset }}-{{ job_type }}"
+  - hv2016-ad:
+    name: "ncad-{{ zuul_change }}-{{ zuul_patchset }}"
+    image: win2016-hypervrole
+    flavor: win2016ad-ci
+    inventory_group: ad
+    additional_params: "ansible_winrm_cert_pem=/home/jenkins-slave/ssl/ssl_winrm.crt ansible_winrm_cert_key_pem=/home/jenkins-slave/ssl/ssl_winrm.key ansible_winrm_transport=certificate ansible_ssh_user=administrator ansible_connection=winrm ansible_winrm_server_cert_validation=ignore ansible_ssh_port=5986"
+    userdata: "{{ lookup('file', '/home/jenkins-slave/ssl/ssl_winrm.crt') }}"
+    tags: "ad-{{ zuul_project | basename }}-{{ zuul_change }}-{{ zuul_patchset }}-{{ job_type }}"
+
+## devstack
+upper_constraints_pinning:
+  - simplejson:
+    project: 'simplejson'
+    value: 'simplejson===3.13.2'
+
+local_conf:
+  enable_services:
+    - rabbit
+    - mysql
+    - key
+    - n-api
+    - n-crt
+    - n-cond
+    - n-sch
+    - n-cauth
+    - neutron
+    - q-svc
+    - q-agt
+    - q-dhcp
+    - q-l3
+    - q-meta
+    - q-metering
+    - q-vpn
+    - g-api
+    - g-reg
+    - cinder
+    - c-api
+    - c-vol
+    - c-sch
+    - c-bak
+    - s-proxy
+    - s-object
+    - s-container
+    - s-account
+    - heat
+    - h-api
+    - h-api-cfn
+    - h-api-cw
+    - h-eng
+    - ceilometer-acentral
+    - ceilometer-acompute
+    - ceilometer-collector
+    - ceilometer-api
+    - ceilometer-anotification
+    - tempest
+
+  disable_services:
+    - n-obj
+    - n-novnc
+    - n-net
+    - n-cpu
+    - q-lbaas
+    - q-fwaas
+    - horizon
+
+  ip_version: 4
+  live_migration: True
+  block_migration: True
+  image_urls: "{{ image_urls }}"
+
+  append: |
+    enable_plugin devstack-plugin-ceph https://opendev.org/openstack/devstack-plugin-ceph
+    ENABLE_CEPH_CINDER=True     # ceph backend for cinder
+    ENABLE_CEPH_GLANCE=False    # store images in ceph
+    ENABLE_CEPH_C_BAK=False      # backup volumes to ceph
+    ENABLE_CEPH_NOVA=False      # allow nova to use ceph resources
+    VOLUME_BACKING_FILE_SIZE=25GB
+
+    ATTACH_ENCRYPTED_VOLUME_AVAILABLE=False
+    SWIFT_REPLICAS=1
+    SWIFT_HASH=66a3d6b56c1f479c8b4e70ab5d2014f6
+    SWIFT_START_ALL_SERVICES=False
+    USE_PYTHON3=True
+
+    [[post-config|$NOVA_CONF]]
+    [DEFAULT]
+    force_config_drive = True
+    scheduler_default_filters=RetryFilter,AvailabilityZoneFilter,RamFilter,DiskFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,ServerGroupAntiAffinityFilter,ServerGroupAffinityFilter,DifferentHostFilter,SameHostFilter
+    [glance]
+    use_glance_v1=False
+    [oslo_messaging_rabbit]
+    heartbeat_timeout_threshold = 600
+    heartbeat_rate = 3
+    [placement]
+    os_region_name = RegionOne
+    project_domain_name = Default
+    project_name = service
+    user_domain_name = Default
+    password = Passw0rd
+    username = placement
+    auth_url = http://{{ devstack_ip }}/identity
+    auth_type = password
+
+    [[post-config|$NEUTRON_CONF]]
+    [database]
+    min_pool_size = 5
+    max_pool_size = 50
+    max_overflow = 50
+    [quotas]
+    quota_network = 100
+    quota_subnet = 100
+    quota_port = 500
+    quota_security_group = 100
+    quota_security_group_rule = 100
+    quota_vip = 100
+    quota_pool = 100
+    quota_loadbalancer = 100
+    quota_router = 100
+    quota_floatingip = 50
+    quota_firewall = 10
+    quota_firewall_policy = 10
+    quota_firewall_rule = 100
+
+    [[post-config|$CINDER_CONF]]
+    [DEFAULT]
+    os_privileged_user_auth_url=http://{{ devstack_ip }}/identity/v2.0
+
+    enabled_backends = ceph
+
+    [ceph]
+    volume_driver = cinder.volume.drivers.rbd.RBDDriver
+    volume_backend_name = ceph
+    rbd_pool = volumes
+    rbd_ceph_conf = /etc/ceph/ceph.conf
+    rbd_flatten_volume_from_snapshot = false
+    rbd_max_clone_depth = 5
+    rbd_store_chunk_size = 4
+    rados_connect_timeout = -1
+
+    [[post-config|/$Q_PLUGIN_CONF_FILE]]
+    [securitygroup]
+    enable_security_group = True
+    # Note(lpetrut): For some reason, the br-int controller is
+    # unaccessible, so we'll stick with ovs-ofctl until we find
+    # out what's wrong.
+    [ovs]
+    of_interface = ovs-ofctl
+
+## windows
+ad_domain: "nc-{{ zuul_change }}-{{ zuul_patchset }}.local"
+
+### MUST ENSURE THAT openstack/requirements PROJECT IS ALWAYS ON THE FIRST POSITION in git_prep_projects VARIABLE
+win_git_prep_projects:
+  - openstack/requirements
+  - openstack/nova
+  - openstack/neutron
+  - openstack/os-win
+  - openstack/os-brick
+  - openstack/networking-hyperv
+
+win_cherry_picks:
+  - project: openstack/os-brick
+    path: "{{ win_dir.build }}\\os-brick"
+    patches:
+      - refs/changes/03/718403/17
+  - project: openstack/nova
+    path: "{{ win_dir.build }}\\nova"
+    patches:
+      - refs/changes/50/763550/7
+
+volume_driver: cinder.volume.drivers.rbd.RBDDriver
+
+ceph_wnbd_msi_url: http://10.100.0.9/ci/ceph_v16_0_0_beta.msi

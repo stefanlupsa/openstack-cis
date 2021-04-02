@@ -4,16 +4,17 @@
       dest: /tmp/get-pip.py
     tags: install-pip
 
-  - name: Create constraints file for {{ pip_version }}
+  - name: Create constraints file for {{ pip_version }} {{ setuptools_version }}
     copy:
       dest: "/tmp/constraints.txt"
       content: |
         {{ pip_version }}
+        {{ setuptools_version }}
 
-  - name: Install pip version {{ pip_version }}
-    shell: "{{ item }} /tmp/get-pip.py -c /tmp/constraints.txt pip"
+
+  - name: Install pip version {{ pip_version }} {{ setuptools_version }}
+    shell: "{{ item }} /tmp/get-pip.py -c /tmp/constraints.txt pip setuptools"
     become: True
     with_items:
-      - python2.7
       - python3
     tags: install-pip

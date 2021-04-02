@@ -1,5 +1,5 @@
 vms:
-  - devstack: 
+  - devstack:
     name: "dv-osbrick-{{ zuul_change }}-{{ zuul_patchset }}-{{ job_type }}"
     image: bionic-09.08.2019
     flavor: devstack
@@ -7,7 +7,7 @@ vms:
     additional_params: 'ansible_ssh_private_key_file=/home/jenkins-slave/.ssh/id_rsa.pem ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"'
     userdata: ""
     tags: "dv-{{ zuul_project | basename }}-{{ zuul_change }}-{{ zuul_patchset }}-{{ job_type }}"
-  - hv2016-compute: 
+  - hv2016-compute:
     name: "hv-osbrick-{{ zuul_change }}-{{ zuul_patchset }}-{{ job_type }}"
     image: win2016-hypervrole
     flavor: ci-win2016hv
@@ -22,6 +22,12 @@ log_key: /home/jenkins-slave/.ssh/id_rsa_log.pem
 log_path: /tmp/build_logs/{{ zuul_change }}-{{ zuul_patchset }}/{{ job_type }}
 
 ## devstack
+# ceph plugin installs simplejson as apt package and will conflict with other devstack automation
+upper_constraints_pinning:
+  - simplejson:
+    project: 'simplejson'
+    value: 'simplejson===3.13.2'
+
 local_conf:
   enable_services:
     - rabbit
@@ -38,32 +44,15 @@ local_conf:
     - q-dhcp
     - q-l3
     - q-meta
-    - q-metering
-    - q-vpn
     - g-api
     - g-reg
     - cinder
+    - c-vol
     - c-api
     - c-sch
-    - s-proxy
-    - s-object
-    - s-container
-    - s-account
-    - heat
-    - h-api
-    - h-api-cfn
-    - h-api-cw
-    - h-eng
-    - ceilometer-acentral
-    - ceilometer-acompute
-    - ceilometer-collector
-    - ceilometer-api
-    - ceilometer-anotification
     - tempest
 
   disable_services:
-    - c-bak
-    - c-vol
     - n-obj
     - n-novnc
     - n-net
@@ -71,12 +60,36 @@ local_conf:
     - q-lbaas
     - q-fwaas
     - horizon
+    - c-bak
+    - ceilometer-acentral
+    - ceilometer-acompute
+    - ceilometer-collector
+    - ceilometer-api
+    - ceilometer-anotification
+    - heat
+    - h-api
+    - h-api-cfn
+    - h-api-cw
+    - h-eng
+    - q-metering
+    - q-vpn
+    - s-proxy
+    - s-object
+    - s-container
+    - s-account
 
   ip_version: 4
   live_migration: False
   block_migration: True
   image_urls: "{{ image_urls }}"
   append: |
+    enable_plugin devstack-plugin-ceph https://opendev.org/openstack/devstack-plugin-ceph
+    ENABLE_CEPH_CINDER=True     # ceph backend for cinder
+    ENABLE_CEPH_GLANCE=False    # store images in ceph
+    ENABLE_CEPH_C_BAK=False      # backup volumes to ceph
+    ENABLE_CEPH_NOVA=False      # allow nova to use ceph resources
+    VOLUME_BACKING_FILE_SIZE=25GB
+
     ATTACH_ENCRYPTED_VOLUME_AVAILABLE=False
     SWIFT_REPLICAS=1
     SWIFT_HASH=66a3d6b56c1f479c8b4e70ab5d2014f6
@@ -91,7 +104,7 @@ local_conf:
     use_glance_v1=False
     [oslo_messaging_rabbit]
     heartbeat_timeout_threshold = 600
-    heartbeat_rate = 3 
+    heartbeat_rate = 3
     [placement]
     os_region_name = RegionOne
     project_domain_name = Default
@@ -101,7 +114,7 @@ local_conf:
     username = placement
     auth_url = http://{{ devstack_ip }}/identity
     auth_type = password
-    
+
     [[post-config|$NEUTRON_CONF]]
     [database]
     min_pool_size = 5
@@ -121,11 +134,23 @@ local_conf:
     quota_firewall = 10
     quota_firewall_policy = 10
     quota_firewall_rule = 100
-    
+
     [[post-config|$CINDER_CONF]]
     [DEFAULT]
     os_privileged_user_auth_url=http://{{ devstack_ip }}/identity/v2.0
- 
+
+    enabled_backends = ceph
+
+    [ceph]
+    volume_driver = cinder.volume.drivers.rbd.RBDDriver
+    volume_backend_name = ceph
+    rbd_pool = volumes
+    rbd_ceph_conf = /etc/ceph/ceph.conf
+    rbd_flatten_volume_from_snapshot = false
+    rbd_max_clone_depth = 5
+    rbd_store_chunk_size = 4
+    rados_connect_timeout = -1
+
     [[post-config|/$Q_PLUGIN_CONF_FILE]]
     [securitygroup]
     enable_security_group = True
@@ -182,12 +207,12 @@ tempest_tests:
       tempest.scenario.test_stamp_pattern.TestStampPattern.test_stamp_pattern
 
 
+
 ## windows
 join_ad: False
 
 win_git_prep_projects:
   - openstack/requirements
-  - openstack/cinder
   - openstack/nova
   - openstack/neutron
   - openstack/compute-hyperv
@@ -203,18 +228,21 @@ services:
     config: "{{ win_dir.etc }}\\nova.conf"
     template: nova.conf
 
-  - cinder:
-    name: cinder-volume
-    description: OpenStack Cinder Volume Service
-    binary: "{{ win_dir.python }}\\scripts\\cinder-volume.exe"
-    config: "{{ win_dir.etc }}\\cinder-volume.conf"
-    template: cinder-volume.conf
-
 win_python_packages:
   - pywin32
   - pbr
   - pymysql
   - ovs
+
+win_cherry_picks:
+  - project: openstack/os-brick
+    path: "{{ win_dir.build }}\\os-brick"
+    patches:
+      - refs/changes/03/718403/17
+  - project: openstack/compute-hyperv
+    path: "{{ win_dir.build }}\\compute-hyperv"
+    patches:
+      - refs/changes/99/718399/5
 
 compute_driver: compute_hyperv.driver.HyperVDriver
 data_bridge_ovs: br-ethernet
@@ -240,5 +268,6 @@ vmswitches:
     subnet: "{{ data_network }}"
     management: False
 
-volume_driver: cinder.volume.drivers.windows.smbfs.WindowsSmbfsDriver
-smbshare: 'c:\smbshare'
+volume_driver: cinder.volume.drivers.rbd.RBDDriver
+
+ceph_wnbd_msi_url: http://10.100.0.9/ci/ceph_v16_0_0_beta.msi

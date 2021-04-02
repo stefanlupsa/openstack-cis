@@ -41,9 +41,6 @@ neutron_hyperv_agent:
     template: neutron-hyperv-agent.conf
 
 win_upper_constraints_pinning:
-  - olsorootwrap:
-    project: 'oslo.rootwrap'
-    value: 'oslo.rootwrap===5.14.0'
   - yappi:
     project: 'yappi'
     value: 'yappi===1.0'
@@ -61,4 +58,4 @@ dns_servers:
   - 8.8.8.8
   - 4.4.4.4
 join_ad: True
-ovs_msi_url: http://10.100.0.9/ci/openvswitch-hyperv-2.7.0-certified.msi
+ovs_msi_url: http://10.100.0.9/ci/openvswitch-hyperv-installer-beta-2.12.msi
