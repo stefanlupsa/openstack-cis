@@ -88,6 +88,10 @@ tempest_tests:
       # https://bugs.launchpad.net/nova/+bug/1257594
       # https://bugs.launchpad.net/nova/+bug/1732428
       tempest.scenario.test_shelve_instance.TestShelveInstance.test_cold_migrate_unshelved_instance
+      # disable tests until fixed with trunking
+      # https://review.opendev.org/c/openstack/tempest/+/774689
+      tempest.api.compute.admin.test_live_migration.LiveAutoBlockMigrationV225Test.test_live_migration_with_trunk
+      tempest.api.compute.admin.test_live_migration.LiveMigrationTest.test_live_migration_with_trunk
 
   isolated-tests: |
       tempest.api.compute.admin.test_servers_negative.ServersAdminNegativeTestJSON.test_resize_server_using_overlimit_ram
