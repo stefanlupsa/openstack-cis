@@ -195,7 +195,7 @@ local_conf:
     SWIFT_HASH=66a3d6b56c1f479c8b4e70ab5d2014f6
     SWIFT_START_ALL_SERVICES=False
     USE_PYTHON3=True
-
+    
     [[post-config|$NOVA_CONF]]
     [DEFAULT]
     force_config_drive = True
@@ -214,6 +214,10 @@ local_conf:
     username = placement
     auth_url = http://{{ devstack_ip }}/identity
     auth_type = password
+    
+    [[local|$NEUTRON_CONF]]
+    [DEFAULT]
+    service_plugins = trunk
     
     [[post-config|$NEUTRON_CONF]]
     [database]
