@@ -22,6 +22,13 @@ log_key: /home/jenkins-slave/.ssh/id_rsa_log.pem
 log_path: /tmp/build_logs/{{ zuul_change }}-{{ zuul_patchset }}/{{ job_type }}
 
 ## devstack
+cherry_picks:
+  - project: openstack/devstack
+    path: "{{ devstack_dir.devstack }}"
+    url: "https://github.com/cloudbase/devstack"
+    patches:
+      - refs/heads/neutron-ovs-bridge-arping
+
 git_prep_projects:
   - openstack/keystone
   - openstack/glance
