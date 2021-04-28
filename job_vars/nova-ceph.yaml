@@ -36,7 +36,7 @@ vms:
 upper_constraints_pinning:
   - simplejson:
     project: 'simplejson'
-    value: 'simplejson===3.13.2'
+    value: 'simplejson===3.16.0'
 
 local_conf:
   enable_services:
