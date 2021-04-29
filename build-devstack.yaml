@@ -51,7 +51,7 @@
 
     - name: Applying cherry-picks
       cb_cherry_pick_devstack:
-        url: "{{ git_server }}/{{ item.project }}"
+        url: "{{ git_server + '/' + item.project if ( item.url | default('') | length == 0 ) else item.url }}"
         ref: "{{ item.patches }}"
         path: "{{ item.path }}"
       with_items: "{{ cherry_picks }}"

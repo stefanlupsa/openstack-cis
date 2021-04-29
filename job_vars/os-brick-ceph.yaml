@@ -1,7 +1,7 @@
 vms:
   - devstack:
     name: "dv-osbrick-{{ zuul_change }}-{{ zuul_patchset }}-{{ job_type }}"
-    image: bionic-09.08.2019
+    image: focal-15.04.2021
     flavor: devstack
     inventory_group: devstack
     additional_params: 'ansible_ssh_private_key_file=/home/jenkins-slave/.ssh/id_rsa.pem ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"'
@@ -22,11 +22,24 @@ log_key: /home/jenkins-slave/.ssh/id_rsa_log.pem
 log_path: /tmp/build_logs/{{ zuul_change }}-{{ zuul_patchset }}/{{ job_type }}
 
 ## devstack
+cherry_picks:
+  - project: openstack/devstack
+    path: "{{ devstack_dir.devstack }}"
+    url: "https://github.com/cloudbase/devstack"
+    patches:
+      - refs/heads/neutron-ovs-bridge-arping
+
 # ceph plugin installs simplejson as apt package and will conflict with other devstack automation
 upper_constraints_pinning:
   - simplejson:
     project: 'simplejson'
-    value: 'simplejson===3.13.2'
+    value: 'simplejson===3.16.0'
+  - pyasn1:
+    project: 'pyasn1'
+    value: 'pyasn1===0.4.8'
+  - pyasn1-modules:
+    project: 'pyasn1-modules'
+    value: 'pyasn1-modules===0.2.8'
 
 local_conf:
   enable_services:

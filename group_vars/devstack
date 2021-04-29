@@ -43,7 +43,9 @@ apt_packages:
 apt_packages_remove:
   - python3-httplib2
   - python3-yaml
+  - python3-pyasn1
   - python3-pyasn1-modules
+  - python3-simplejson
 
 python_packages:
   - virtualenv
