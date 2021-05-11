@@ -26,7 +26,7 @@ vms:
   - hv2016-ad:
     name: "n-ad-{{ zuul_change }}-{{ zuul_patchset }}"
     image: win2016-hypervrole
-    flavor: win2016ad-ci
+    flavor: win2016ad-ci-sl
     inventory_group: ad
     additional_params: "ansible_winrm_cert_pem=/home/jenkins-slave/ssl/ssl_winrm.crt ansible_winrm_cert_key_pem=/home/jenkins-slave/ssl/ssl_winrm.key ansible_winrm_transport=certificate ansible_ssh_user=administrator ansible_connection=winrm ansible_winrm_server_cert_validation=ignore ansible_ssh_port=5986"
     userdata: "{{ lookup('file', '/home/jenkins-slave/ssl/ssl_winrm.crt') }}"
